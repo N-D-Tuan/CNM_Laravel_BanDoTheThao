@@ -98,3 +98,6 @@ ALTER TABLE ChiTietDonHang ADD CONSTRAINT CHK_SoLuongMua CHECK (soLuong > 0);
 
 -- 4. Bổ sung Check cho Đánh giá
 ALTER TABLE DanhGiaSanPham ADD CONSTRAINT CHK_SoSao CHECK (soSao BETWEEN 1 AND 5);
+
+-- 5. Bổ sung Check cho Đơn hàng
+ALTER TABLE DonHang ADD CONSTRAINT CHK_TrangThai CHECK (trangThai IN ('Chờ duyệt', 'Đang giao', 'Đã giao', 'Đã hủy'));
