@@ -1,3 +1,4 @@
+CREATE DATABASE quanlybanhangthethao;
 USE quanlybanhangthethao;
 
 -- 1. Bảng User
@@ -101,3 +102,6 @@ ALTER TABLE DanhGiaSanPham ADD CONSTRAINT CHK_SoSao CHECK (soSao BETWEEN 1 AND 5
 
 -- 5. Bổ sung Check cho Đơn hàng
 ALTER TABLE DonHang ADD CONSTRAINT CHK_TrangThai CHECK (trangThai IN ('Chờ duyệt', 'Đang giao', 'Đã giao', 'Đã hủy'));
+
+-- 6. Bổ sung cột cho User
+ALTER TABLE User ADD COLUMN remember_token VARCHAR(100) NULL AFTER role; 

@@ -25,6 +25,7 @@ class Chitietdonhang extends Model
 	protected $table = 'chitietdonhang';
 	public $incrementing = false;
 	public $timestamps = false;
+	protected $primaryKey = null;
 
 	protected $casts = [
 		'maDonHang' => 'int',
@@ -33,6 +34,8 @@ class Chitietdonhang extends Model
 	];
 
 	protected $fillable = [
+		'maDonHang',
+        'maSanPham',
 		'soLuong'
 	];
 
