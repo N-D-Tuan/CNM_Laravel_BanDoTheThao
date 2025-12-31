@@ -1,0 +1,57 @@
+<div class="auth-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div class="card auth-card">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-dark">LPT STORE</h3>
+                        <p class="text-muted small">Chào mừng bạn trở lại!</p>
+                    </div>
+
+                    <div id="login-alert" class="alert d-none py-2 small" role="alert"></div>
+
+                    <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-uppercase">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                <input type="email" id="email" class="form-control border-start-0" placeholder="name@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase">Mật khẩu</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                <input type="password" id="password" class="form-control border-start-0 border-end-0" placeholder="••••••••" required>
+                                <span class="input-group-text bg-white border-start-0" style="cursor: pointer;" onclick="togglePassword()">
+                                    <i id="toggleIcon" class="bi bi-eye"></i>
+                                </span>
+                            </div>
+                            <div class="text-end mt-2">
+                                <a href="#" class="text-decoration-none small fw-bold text-primary" onclick="showPage('forgot-password')">Quên mật khẩu?</a>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-auth shadow-sm mb-3">
+                            ĐĂNG NHẬP
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3 pt-3 border-top">
+                        <p class="small text-muted">Chưa có tài khoản? 
+                            <a href="#" class="text-primary fw-bold text-decoration-none" onclick="showPage('register')">Đăng ký ngay</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        handleLogin();
+    });
+</script>

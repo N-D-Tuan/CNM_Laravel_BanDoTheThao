@@ -1,0 +1,75 @@
+<div class="admin-wrapper">
+    <nav class="admin-sidebar shadow">
+        <div class="sidebar-header">
+            <h4 class="fw-bold mb-0 text-primary">LPT <span class="text-white">ADMIN</span></h4>
+        </div>
+        <div class="nav flex-column mt-3">
+            <a href="#" class="nav-link active" onclick="event.preventDefault(); showAdminContent('default')">
+                <i class="bi bi-speedometer2"></i> Thống kê
+            </a>
+            <a href="#" class="nav-link" onclick="event.preventDefault(); showAdminContent('users')">
+                <i class="bi bi-people"></i> Người dùng
+            </a>
+            <a href="#" class="nav-link" onclick="event.preventDefault(); showAdminContent('categories')">
+                <i class="bi bi-grid"></i> Danh mục
+            </a>
+            <a href="#" class="nav-link" onclick="event.preventDefault(); showAdminContent('products')">
+                <i class="bi bi-box-seam"></i> Sản phẩm
+            </a>
+            <a href="#" class="nav-link" onclick="event.preventDefault(); showAdminContent('orders')">
+                <i class="bi bi-cart-check"></i> Đơn hàng
+            </a>
+            <hr class="mx-3 text-secondary">
+            <a href="#" class="nav-link text-warning" onclick="showPage('trang-chu')">
+                <i class="bi bi-house-door"></i> Về trang chủ
+            </a>
+        </div>
+    </nav>
+
+    <main class="admin-content-area">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">TỔNG QUAN THỐNG KÊ</h2>
+            <button class="btn btn-outline-primary btn-sm" onclick="loadAdminStats()">
+                <i class="bi bi-arrow-clockwise"></i> Làm mới
+            </button>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm bg-primary text-white p-3">
+                    <p class="small text-uppercase mb-1">Tổng người dùng</p>
+                    <h2 id="stat-total-users" class="fw-bold mb-0">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm bg-success text-white p-3">
+                    <p class="small text-uppercase mb-1">Khách hàng</p>
+                    <h2 id="stat-customers" class="fw-bold mb-0">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm bg-info text-white p-3">
+                    <p class="small text-uppercase mb-1">Quản trị viên</p>
+                    <h2 id="stat-admins" class="fw-bold mb-0">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm bg-danger text-white p-3">
+                    <p class="small text-uppercase mb-1">Tài khoản đã xóa</p>
+                    <h2 id="stat-deleted" class="fw-bold mb-0">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-sub-content">
+            <div class="alert alert-light border shadow-sm">
+                <h5>Chào mừng quay trở lại, Admin!</h5>
+                <p class="mb-0 text-muted">Chọn các mục bên sidebar để quản lý hệ thống.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    loadAdminStats();
+</script>

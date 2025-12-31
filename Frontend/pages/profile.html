@@ -1,0 +1,61 @@
+<div id="profile-page">
+    <div class="container">
+        <div class="row w-100 justify-content-center m-0">
+            <div class="col-md-6 col-lg-5">
+                <div class="card profile-card shadow-lg">
+                    <h3 class="fw-bold mb-4 text-center text-uppercase">Hồ sơ cá nhân</h3>
+                    
+                    <div id="profile-alert" class="alert d-none py-2 small" role="alert"></div>
+
+                    <form id="profileForm" onsubmit="event.preventDefault(); handleUpdateProfile();">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Họ và tên</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                                <input type="text" id="profile-name" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                <input type="email" id="profile-email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Số điện thoại</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                                <input type="text" id="profile-phone" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-secondary">Vai trò tài khoản</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-shield-lock"></i></span>
+                                <input type="text" id="profile-role" class="form-control bg-light" readonly>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
+                            <i class="bi bi-check-circle me-2"></i>LƯU THAY ĐỔI
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Khi trang vừa load, đổ dữ liệu từ localStorage vào form
+    (function fillProfileData() {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if(user) {
+            document.getElementById('profile-name').value = user.tenNguoiDung;
+            document.getElementById('profile-email').value = user.email;
+            document.getElementById('profile-phone').value = user.soDienThoai;
+            document.getElementById('profile-role').value = user.role;
+        }
+    })();
+</script>
