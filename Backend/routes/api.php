@@ -11,10 +11,6 @@ use App\Http\Controllers\TinhNangController;
 use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\DanhMucSanPhamController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
 Route::post('/danh-gia', [DanhGiaController::class, 'store']);
 Route::get('/danh-gia/{maSanPham}', [DanhGiaController::class, 'index']);
 Route::get('/danh-muc', [DanhMucController::class, 'index']);
