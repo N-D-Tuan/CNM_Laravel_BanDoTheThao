@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\TinhNangController;
 use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\DanhMucSanPhamController;
 
@@ -10,6 +11,11 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::post('/tinh-nang', [TinhNangController::class, 'themTinhNang']);
+Route::get('/tinh-nang/{maSanPham}', [TinhNangController::class, 'xemTinhNang']);
+Route::put('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'suaTinhNang']);
+Route::delete('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'xoaTinhNang']);
+Route::get('/tinh-nang', [TinhNangController::class, 'xemTatCaTinhNang']);
 // Routes cho Giỏ hàng - CHỈ ĐỊNH NGHĨA 1 LẦN
 Route::get('/giohang/count', [GioHangController::class, 'count']);      // Phải để TRƯỚC /giohang/{maSanPham}
 Route::get('/giohang', [GioHangController::class, 'index']);           
