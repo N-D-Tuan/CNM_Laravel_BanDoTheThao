@@ -1,3 +1,4 @@
+CREATE DATABASE quanlybanhangthethao;
 USE quanlybanhangthethao;
 
 -- 1. Bảng User
