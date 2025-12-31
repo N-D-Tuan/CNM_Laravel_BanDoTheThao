@@ -4,6 +4,7 @@ use App\Http\Controllers\DonHangController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DanhGiaController;
 use App\Http\Controllers\SanPhamController;
 use App\Http\Controllers\DanhMucController;
 use App\Http\Controllers\TinhNangController;
@@ -14,6 +15,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::post('/danh-gia', [DanhGiaController::class, 'store']);
+Route::get('/danh-gia/{maSanPham}', [DanhGiaController::class, 'index']);
 Route::get('/danh-muc', [DanhMucController::class, 'index']);
 Route::post('/danh-muc', [DanhMucController::class, 'store']);
 Route::put('/danh-muc/{id}', [DanhMucController::class, 'update']);
