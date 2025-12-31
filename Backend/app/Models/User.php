@@ -8,8 +8,10 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * Class User
@@ -23,22 +25,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $resetOtp
  * @property Carbon|null $resetOtpExpiry
  * @property string|null $deleted_at
- * 
+ * @property string|null $remember_token
  * @property Collection|Danhgiasanpham[] $danhgiasanphams
  * @property Collection|Donhang[] $donhangs
  * @property Collection|Giohang[] $giohangs
  *
  * @package App\Models
  */
-class User extends Model
+class User extends Authenticatable
 {
-	use SoftDeletes;
+	use HasApiTokens, Notifiable, SoftDeletes;
+	
 	protected $table = 'user';
 	protected $primaryKey = 'maNguoiDung';
 	public $timestamps = false;
 
 	protected $casts = [
-		'resetOtpExpiry' => 'datetime'
+		'resetOtpExpiry' => 'datetime',
+        'deleted_at' => 'datetime'
 	];
 
 	protected $fillable = [
@@ -48,8 +52,19 @@ class User extends Model
 		'matKhau',
 		'role',
 		'resetOtp',
-		'resetOtpExpiry'
+		'resetOtpExpiry',
+        'remember_token'
 	];
+
+	protected $hidden = [
+        'matKhau',
+        'remember_token', 
+    ];
+	
+	public function getAuthPassword()
+    {
+        return $this->matKhau;
+    }
 
 	public function danhgiasanphams()
 	{
