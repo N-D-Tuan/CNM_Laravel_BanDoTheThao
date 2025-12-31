@@ -1,0 +1,292 @@
+/* Đảm bảo toàn bộ trang có font chữ hiện đại */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* 1. Sửa lỗi Header đè lên nội dung: 
+   Vì dùng sticky-top, ta cần thêm padding-top cho body hoặc margin cho phần tiếp theo */
+#main-content {
+    min-height: 80vh; /* Đảm bảo trang luôn có độ cao tối thiểu */
+}
+
+/* 2. Hero Section: Tăng padding để đẩy nội dung xuống dưới Header */
+.hero-section {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1200');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 120px 0 80px 0; /* Tăng padding top lên 120px để tránh bị Header che */
+}
+
+/* 3. Sửa lỗi khoảng cách "Môn thể thao ưu tiên" bị dính */
+.section-padding {
+    padding-top: 80px; /* Tạo khoảng cách an toàn giữa các khối nội dung */
+    padding-bottom: 40px;
+}
+
+/* Hiệu ứng chuyển cảnh mờ dần cho Carousel */
+.carousel-fade .carousel-item {
+    transition-duration: 0.8s;
+}
+
+/* Đảm bảo hình ảnh trong slide không bị méo */
+#homeAboutCarousel img {
+    border-radius: 8px;
+    filter: brightness(0.9); /* Làm tối nhẹ để đồng bộ với style chung */
+}
+
+/* Giữ nguyên fix ảnh bằng nhau của bạn */
+.sport-card {
+    height: 400px;
+    border: none;
+    overflow: hidden;
+    border-radius: 15px;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+/* Container chứa 2 ảnh chồng lên nhau */
+.image-container {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.sport-card img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    position: absolute; /* Để 2 ảnh đè lên nhau */
+    top: 0;
+    left: 0;
+    transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+/* Ảnh mặc định nằm trên */
+.default-img {
+    z-index: 1;
+    opacity: 1;
+}
+
+/* Ảnh khi hover nằm dưới hoặc mờ đi */
+.hover-img {
+    z-index: 0;
+    opacity: 0;
+    transform: scale(1.1); /* Tạo hiệu ứng zoom nhẹ sẵn */
+}
+
+/* Khi hover: Ẩn ảnh mặc định, hiện ảnh hover */
+.sport-card:hover .default-img {
+    opacity: 0;
+    transform: scale(1.1);
+}
+
+.sport-card:hover .hover-img {
+    opacity: 1;
+    transform: scale(1); /* Thu về kích thước chuẩn khi hiện ra */
+    z-index: 1;
+}
+
+/* Giữ cho lớp phủ overlay (chữ) luôn nằm trên cùng */
+.card-img-overlay {
+    z-index: 2 !important;
+}
+
+.sport-card::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 1;
+}
+
+/* Footer Style */
+footer {
+    background-color: #1a1a1a;
+    color: #ffffff;
+    padding: 60px 0 20px 0;
+    margin-top: 0 !important;
+}
+
+footer h5 {
+    color: #0d6efd; /* Màu Blue của Bootstrap */
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+footer a {
+    color: #adb5bd;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+footer a:hover {
+    color: #ffffff;
+    padding-left: 5px;
+}
+
+.social-icons fs-4 a {
+    margin-right: 15px;
+}
+
+/* Làm đẹp các ô input khi click vào */
+.form-control:focus {
+    box-shadow: none;
+    border-color: #0d6efd;
+    background-color: #fff !important;
+}
+
+.input-group-text {
+    border-color: #dee2e6;
+}
+
+/* Hiệu ứng cho nút Đăng nhập */
+.btn-primary {
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
+}
+
+/* Card đăng nhập */
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* root/css/style.css */
+
+/* Class chung cho các trang xác thực */
+.auth-page {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1920') no-repeat center center fixed; 
+    background-size: cover;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -70px; 
+    padding-top: 90px;
+    padding-bottom: 50px;
+}
+
+/* Card trắng nguyên bản, không bị ám màu background */
+.auth-card {
+    background-color: #ffffff !important;
+    border-radius: 15px !important;
+    border: none !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
+    padding: 2.5rem !important;
+}
+
+/* Hiệu ứng cho các nút */
+.btn-auth {
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: bold;
+}
+
+#profile-page {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -70px; /* Bù trừ padding của body */
+    padding: 100px 0 50px 0;
+}
+
+.profile-card {
+    background-color: #ffffff !important;
+    border-radius: 20px !important;
+    border: none !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
+    padding: 2.5rem !important;
+}
+
+.profile-card h3 {
+    color: #333;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.profile-card h3::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: #0d6efd;
+}
+
+/* Sidebar Admin */
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-sidebar {
+    width: 250px;
+    background: #212529;
+    color: white;
+    transition: all 0.3s;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.admin-sidebar .sidebar-header {
+    padding: 20px;
+    background: #1a1d20;
+    text-align: center;
+}
+
+.admin-sidebar .nav-link {
+    color: #adb5bd;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    transition: 0.3s;
+}
+
+.admin-sidebar .nav-link:hover, 
+.admin-sidebar .nav-link.active {
+    background: #343a40;
+    color: #0d6efd;
+}
+
+.admin-sidebar .nav-link i {
+    margin-right: 12px;
+    font-size: 1.1rem;
+}
+
+/* Content Area */
+.admin-content-area {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 30px;
+}
+
+.stat-card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}

@@ -1,0 +1,41 @@
+<div class="auth-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card auth-card">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold">TẠO TÀI KHOẢN</h3>
+                        <p class="text-muted small">Gia nhập cộng đồng LPT Store ngay hôm nay</p>
+                    </div>
+
+                    <div id="register-alert" class="alert d-none py-2 small" role="alert"></div>
+
+                    <form onsubmit="event.preventDefault(); handleRegister();">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Họ và tên</label>
+                            <input type="text" id="reg-name" class="form-control" placeholder="Nguyễn Văn A" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" id="reg-email" class="form-control" placeholder="email@example.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Số điện thoại</label>
+                            <input type="text" id="reg-phone" class="form-control" placeholder="09xxxxxxx" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Mật khẩu</label>
+                            <input type="password" id="reg-password" class="form-control" placeholder="Tối thiểu 6 ký tự" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-auth shadow-sm mb-3">ĐĂNG KÝ</button>
+                    </form>
+
+                    <div class="text-center mt-3 pt-3 border-top">
+                        <p class="small text-muted">Đã có tài khoản? <a href="#" class="text-primary fw-bold text-decoration-none" onclick="showPage('login')">Đăng nhập</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
