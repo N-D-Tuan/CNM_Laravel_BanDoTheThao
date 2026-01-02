@@ -1,0 +1,66 @@
+<div class="container product-page-container my-5">
+
+    <!-- Sidebar Danh Mục -->
+    <aside class="product-sidebar">
+        <h5>Danh Mục Sản Phẩm</h5>
+        <ul>
+            <div id="dynamic-categories"></div>
+        </ul>
+
+        <!-- Bộ Lọc -->
+        <div class="filter-group mt-5">
+            <h5 class="fw-bold mb-3">Lọc Theo Giá</h5>
+
+            <div class="form-check mb-2">
+                <input class="form-check-input price-checkbox" type="checkbox" id="price1" data-price-from="0"
+                    data-price-to="499999">
+                <label class="form-check-label" for="price1">Dưới 500.000 VNĐ</label>
+            </div>
+
+            <div class="form-check mb-2">
+                <input class="form-check-input price-checkbox" type="checkbox" id="price2" data-price-from="500000"
+                    data-price-to="1000000">
+                <label class="form-check-label" for="price2">500.000 - 1.000.000 VNĐ</label>
+            </div>
+
+            <div class="form-check mb-2">
+                <input class="form-check-input price-checkbox" type="checkbox" id="price3" data-price-from="1000001"
+                    data-price-to="">
+                <label class="form-check-label" for="price3">Trên 1.000.000 VNĐ</label>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- Main Product Area -->
+    <section class="product-main">
+        <div class="product-header">
+            <div class="product-search">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm sản phẩm...">
+                    <button id="searchBtn" class="btn btn-primary"><i class="fas fa-search"></i>Tìm kiếm</button>
+                </div>
+            </div>
+            <div>
+                <select class="form-select" id="sortSelect">
+                    <option value="0">Tất cả</option>
+                    <option value="newest">Mới nhất</option>
+                    <option value="price-asc">Giá thấp đến cao</option>
+                    <option value="price-desc">Giá cao đến thấp</option>
+                    <option value="best-seller">Bán chạy nhất</option>
+
+                </select>
+            </div>
+        </div>
+
+        <!-- Grid Sản Phẩm -->
+        <div class="product-grid">
+
+        </div>
+
+        <!-- Phân Trang -->
+        <div class="product-pagination">
+            <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+        </div>
+    </section>
+</div>

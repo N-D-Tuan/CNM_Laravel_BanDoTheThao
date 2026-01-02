@@ -19,9 +19,10 @@ Route::put('/danh-muc/{id}', [DanhMucController::class, 'update']);
 Route::delete('/danh-muc/{id}', [DanhMucController::class, 'destroy']);
 
 Route::get('/san-pham', [SanPhamController::class, 'index']);
-Route::get('/san-pham/{id}', [SanPhamController::class, 'show']);
-Route::get('/danh-muc/{id}/san-pham', [SanPhamController::class, 'getByDanhMuc']);
 
+Route::get('/san-pham/danh-muc/{id}', [SanPhamController::class, 'getByDanhMuc']);
+Route::get('/san-pham/filter', [SanPhamController::class, 'filter']);
+Route::get('/san-pham/{id}', [SanPhamController::class, 'show']);
 Route::post('/san-pham', [SanPhamController::class, 'store']);
 Route::put('/san-pham/{id}', [SanPhamController::class, 'update']);
 Route::delete('/san-pham/{id}', [SanPhamController::class, 'destroy']);
