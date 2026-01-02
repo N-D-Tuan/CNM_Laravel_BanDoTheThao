@@ -105,3 +105,6 @@ ALTER TABLE DonHang ADD CONSTRAINT CHK_TrangThai CHECK (trangThai IN ('Chờ duy
 
 -- 6. Bổ sung cột cho User
 ALTER TABLE User ADD COLUMN remember_token VARCHAR(100) NULL AFTER role; 
+
+-- 7. Bổ sung cột cho Sản phẩm
+ALTER TABLE sanpham ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
