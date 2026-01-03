@@ -7,7 +7,7 @@ async function showPage(pageName) {
 
     const footer = document.getElementById('footer-placeholder');
     if (footer) {
-        const noFooterPages = ['login', 'register', 'forgot-password', 'reset-password', 'profile', 'change-password'];
+        const noFooterPages = ['login', 'register', 'forgot-password', 'reset-password', 'profile', 'change-password', 'order-user'];
         if (noFooterPages.includes(pageName)) {
             footer.style.display = 'none';
         } else {
@@ -32,6 +32,20 @@ async function showPage(pageName) {
     if (pageName === 'profile') {
         fillProfileData();
     }
+
+    if (pageName === "order-user") {
+        setTimeout(async () => {
+            if (window.loadUserOrders) {
+            await window.loadUserOrders()
+            }
+
+            if (window.renderUserOrders) {
+            window.renderUserOrders("Tất cả")
+            }
+        }, 0)
+    }
+
+
     if (pageName === 'san-pham') {
         if (typeof window.initProductPage === 'function') {
             setTimeout(() => window.initProductPage(), 100);
@@ -63,8 +77,8 @@ function renderHeader() {
                <li><hr class="dropdown-divider"></li>`
             : '';
 
-        const orderLink = user.role !== 'Admin'
-            ? `<li><a class="dropdown-item" href="#"><i class="bi bi-bag me-2"></i>Đơn hàng</a></li>`
+        const orderLink = user.role !== 'Admin' 
+            ? `<li><a class="dropdown-item" href="#" onclick="showPage('order-user')"><i class="bi bi-bag me-2"></i>Đơn hàng</a></li>` 
             : '';
 
         authSection.innerHTML = `
