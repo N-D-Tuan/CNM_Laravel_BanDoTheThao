@@ -1,0 +1,219 @@
+/* ===================================
+   PRODUCT LIST PAGE (san-pham.html)
+   =================================== */
+
+/* Layout chính: Sidebar + Main content */
+.product-page-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    gap: 30px;
+}
+
+/* Sidebar danh mục */
+.product-sidebar {
+    width: 280px;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    /* position: sticky; */
+    top: 100px;
+    height: fit-content;
+}
+
+.product-sidebar h5 {
+    font-weight: bold;
+    color: #0d6efd;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0d6efd;
+}
+
+/* Highlight mục "Sản phẩm bán chạy" đầu tiên */
+.product-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.product-sidebar ul li {
+    margin-bottom: 12px;
+}
+
+.product-sidebar ul li a {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.product-sidebar ul li a:hover {
+    background: #0d6efd;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Bộ lọc */
+.filter-group {
+    margin-bottom: 30px;
+}
+
+.filter-group h5 {
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.filter-group .form-check-label {
+    cursor: pointer;
+}
+
+.filter-group .form-check-input:checked+.form-check-label {
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+/* Main content */
+.product-main {
+    flex: 1;
+}
+
+/* Thanh tìm kiếm + sort */
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.product-search input {
+    width: 350px;
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+}
+
+.product-search button {
+    padding: 12px 20px;
+    border-radius: 10px;
+}
+
+/* Grid sản phẩm */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.product-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.product-card:hover img {
+    transform: scale(1.08);
+}
+
+.product-card .card-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.product-card h5 {
+    font-size: 1.1rem;
+    margin: 15px 0 10px;
+    color: #333;
+}
+
+.product-card .price {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.product-card .old-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 1rem;
+    margin-right: 8px;
+}
+
+/* Phân trang */
+.product-pagination {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.product-pagination a {
+    display: inline-block;
+    padding: 10px 16px;
+    margin: 0 5px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.product-pagination a.active,
+.product-pagination a:hover {
+    background: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .product-page-container {
+        flex-direction: column;
+    }
+
+    .product-sidebar {
+        width: 100%;
+        position: static;
+    }
+
+    .product-search input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Active category: highlight khi chọn */
+.category-link.active-category {
+    background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+    color: white !important;
+    transform: translateX(5px);
+}
+
+/* Hover cho danh mục thường */
+.category-link:hover:not(.active-category) {
+    background: #e7f3ff;
+    color: #0d6efd;
+    transform: translateX(5px);
+}

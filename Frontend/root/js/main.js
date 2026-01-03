@@ -15,11 +15,15 @@ async function showPage(pageName) {
         }
     }
 
+    if (pageName === 'admin-dashboard') {
+        window.loadAdminStats();
+    }
+
     if (pageName === 'trang-chu') {
         const myCarousel = document.querySelector('#homeAboutCarousel');
         if (myCarousel) {
             new bootstrap.Carousel(myCarousel, {
-                interval: 2000, 
+                interval: 2000,
                 ride: 'carousel'
             });
         }
@@ -42,6 +46,11 @@ async function showPage(pageName) {
     }
 
 
+    if (pageName === 'san-pham') {
+        if (typeof window.initProductPage === 'function') {
+            setTimeout(() => window.initProductPage(), 100);
+        }
+    }
     window.scrollTo(0, 0);
 }
 
@@ -52,7 +61,7 @@ async function init() {
 
     const footerHtml = await fetch('components/footer.html').then(r => r.text());
     document.getElementById('footer-placeholder').innerHTML = footerHtml;
-    
+
     // Kiểm tra login để hiển thị nút
     renderHeader();
     showPage('trang-chu');
@@ -63,9 +72,9 @@ function renderHeader() {
     const authSection = document.getElementById('auth-buttons');
 
     if (user) {
-        const adminLink = user.role === 'Admin' 
+        const adminLink = user.role === 'Admin'
             ? `<li><a class="dropdown-item fw-bold text-primary" href="#" onclick="showPage('admin-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Admin Dash</a></li>
-               <li><hr class="dropdown-divider"></li>` 
+               <li><hr class="dropdown-divider"></li>`
             : '';
 
         const orderLink = user.role !== 'Admin' 
