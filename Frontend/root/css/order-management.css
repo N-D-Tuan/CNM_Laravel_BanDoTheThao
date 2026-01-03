@@ -1,0 +1,55 @@
+/* Style cho thanh công cụ tìm kiếm và lọc */
+.order-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.order-toolbar .form-control,
+.order-toolbar .form-select {
+  max-width: 200px;
+  font-size: 0.9rem;
+}
+
+/* Style cho các nút thao tác */
+.btn-action {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  margin-right: 4px;
+}
+
+/* Style cho bảng đơn hàng */
+.order-table tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.order-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Style cho Modal chi tiết đơn hàng */
+.order-detail-img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.detail-row {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.order-summary {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}

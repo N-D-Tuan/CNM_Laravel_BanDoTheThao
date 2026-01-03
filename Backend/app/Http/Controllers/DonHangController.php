@@ -11,20 +11,41 @@ use Illuminate\Support\Facades\DB;
 class DonHangController extends Controller
 {
     //get toàn bộ đơn hàng
-    public function index() {
+    public function index()
+    {
         $donhangs = Donhang::with([
             'user',
-            'chitietdonhangs'
+            'chitietdonhangs.sanpham'
         ])->get();
+
+        $result = $donhangs->map(function ($dh) {
+            return [
+                'id' => $dh->maDonHang,
+                'userId' => $dh->maNguoiDung,
+                'customer' => $dh->user->tenNguoiDung ?? '',
+                'date' => $dh->ngayDat,
+                'total' => $dh->tongTien,
+                'status' => $dh->trangThai,
+                'details' => $dh->chitietdonhangs->map(function ($ct) {
+                    return [
+                        'name' => $ct->sanpham->tenSanPham ?? '',
+                        'quantity' => $ct->soLuong,
+                        'price' => $ct->sanpham->giaBan ?? 0,
+                        'img' => $ct->sanpham->hinhAnh ?? null,
+                    ];
+                })
+            ];
+        });
 
         return response()->json([
             'status' => true,
-            'message' => 'Lấy danh sách đơn hàng thành công',
-            'data' => $donhangs
+            'message' => 'Lấy danh sách đơn hàng thành công',
+            'data' => $result
         ]);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         DB::beginTransaction();
         try {
             //tạo đơn hàng
@@ -64,7 +85,7 @@ class DonHangController extends Controller
                 'message' => 'Tạo đơn hàng thành công',
                 'data' => $donHang
             ]);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
@@ -76,25 +97,47 @@ class DonHangController extends Controller
     }
 
     //lấy đơn hàng theo user
-    public function getByUser($id) {
-        $donHang = Donhang::where('maNguoiDung', $id)
-            ->with('chitietdonhangs')
+    public function getByUser($id)
+    {
+        $donhangs = Donhang::where('maNguoiDung', $id)
+            ->with('chitietdonhangs.sanpham')
             ->get();
+
+        $result = $donhangs->map(function ($dh) {
+            return [
+                'id' => $dh->maDonHang,
+                'date' => $dh->ngayDat?->format('d/m/Y H:i'),
+                'status' => $dh->trangThai,
+                'total' => $dh->tongTien,
+                'address' => $dh->diaChi,
+                'items' => $dh->chitietdonhangs->map(function ($ct) {
+                    return [
+                        'name' => $ct->sanpham->tenSanPham ?? '',
+                        'qty' => $ct->soLuong,
+                        'price' => $ct->sanpham->giaBan ?? 0,
+                        'img' => $ct->sanpham->hinhAnh ?? null,
+                    ];
+                })
+            ];
+        });
 
         return response()->json([
             'status' => true,
-            'data' => $donHang
+            'data' => $result
         ]);
     }
 
+
+
     //Lấy đơn hàng theo mã đơn hàng(dùng để khi người dùng click vào bấm xem chi tiết đơn hàng đó)
-    public function getByMaDonHang($id) {
+    public function getByMaDonHang($id)
+    {
         $donHang = Donhang::with([
             'user',
             'chitietdonhangs.sanpham'
         ])->find($id);
 
-        if(!$donHang) {
+        if (!$donHang) {
             return response()->json([
                 'status' => false,
                 'message' => 'Không tìm thấy đơn hàng'
@@ -108,18 +151,19 @@ class DonHangController extends Controller
     }
 
     // Cập nhật trạng thái đơn hàng
-    function updateTrangThai(Request $request, $id) {
+    function updateTrangThai(Request $request, $id)
+    {
         $request->validate([
             'trangThai' => 'required|in:Chờ duyệt,Đang giao,Đã giao,Đã hủy'
         ]);
-        
+
         $donHang = Donhang::find($id);
 
-        if(!$donHang) {
+        if (!$donHang) {
             return response()->json([
                 'status' => false,
                 'message' => 'Không tìm thấy đơn hàng'
-            ],404);
+            ], 404);
         }
 
         $donHang->trangThai = $request->trangThai;
