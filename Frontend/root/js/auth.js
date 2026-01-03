@@ -231,7 +231,7 @@ window.handleUpdateProfile = async function() {
 window.requestOtp = async function() {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('access_token');
-    const oldPass = document.getElementById('cp-old-password').value;
+    const oldPass = document.getElementById('password').value;
     const newPass = document.getElementById('cp-new-password').value;
     const alertDiv = document.getElementById('cp-alert');
 
@@ -291,7 +291,7 @@ window.requestOtp = async function() {
 window.finalizeChangePassword = async function() {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('access_token');
-    const matKhauCu = document.getElementById('cp-old-password').value;
+    const matKhauCu = document.getElementById('password').value;
     const matKhauMoi = document.getElementById('cp-new-password').value;
     const otp = document.getElementById('cp-otp').value;
     const alertDiv = document.getElementById('cp-alert');

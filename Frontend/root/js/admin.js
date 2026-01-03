@@ -15,6 +15,150 @@ window.loadAdminStats = async function() {
     } catch (e) { console.error("Lỗi nạp thống kê:", e); }
 };
 
+// --- LẤY DANH SÁCH NGƯỜI DÙNG ĐANG HOẠT ĐỘNG ---
+window.fetchUserList = async function() {
+    const token = localStorage.getItem('access_token');
+    toggleUserListButtons('active');
+    
+    try {
+        const response = await fetch(`${API_URL}/users/all`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        const users = await response.json();
+        renderUserTable(users, false);
+    } catch (e) { console.error("Lỗi nạp danh sách user:", e); }
+};
+
+// --- LẤY DANH SÁCH NGƯỜI DÙNG ĐÃ XÓA MỀM ---
+window.fetchDeletedUsers = async function() {
+    const token = localStorage.getItem('access_token');
+    toggleUserListButtons('deleted');
+    
+    try {
+        const response = await fetch(`${API_URL}/users/deleted-list`, {
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        const users = await response.json();
+        renderUserTable(users, true);
+    } catch (e) { console.error("Lỗi nạp danh sách đã xóa:", e); }
+};
+
+// --- VẼ BẢNG NGƯỜI DÙNG ---
+function renderUserTable(users, isDeletedView) {
+    const tbody = document.getElementById('user-table-body');
+    if (!users || users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Không có dữ liệu.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map(user => `
+        <tr>
+            <td>${user.maNguoiDung}</td>
+            <td class="fw-bold">${user.tenNguoiDung}</td>
+            <td>${user.email}</td>
+            <td>${user.soDienThoai}</td>
+            <td><span class="badge ${user.role === 'Admin' ? 'bg-danger' : 'bg-info'}">${user.role}</span></td>
+            <td class="text-center">
+                ${isDeletedView ? `
+                    <button class="btn btn-sm btn-success" onclick="confirmRestore(${user.maNguoiDung})">
+                        <i class="bi bi-arrow-counterclockwise"></i> Khôi phục
+                    </button>
+                ` : `
+                    <button class="btn btn-sm btn-warning me-1" onclick="openEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                        <i class="bi bi-pencil-square"></i> Sửa
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="confirmDelete(${user.maNguoiDung})">
+                        <i class="bi bi-trash"></i> Xóa
+                    </button>
+                `}
+            </td>
+        </tr>
+    `).join('');
+}
+
+function toggleUserListButtons(type) {
+    document.getElementById('btn-active-users').classList.toggle('active', type === 'active');
+    document.getElementById('btn-deleted-users').classList.toggle('active', type === 'deleted');
+}
+
+// --- XÓA MỀM ---
+window.confirmDelete = async function(id) {
+    if (!confirm("Bạn có chắc chắn muốn xóa người dùng này vào thùng rác?")) return;
+    
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/users/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        if (response.ok) {
+            alert("Đã xóa người dùng thành công!");
+            fetchUserList();
+            loadAdminStats(); // Cập nhật lại số liệu thống kê
+        }
+    } catch (e) { alert("Lỗi khi xóa người dùng"); }
+};
+
+// --- KHÔI PHỤC ---
+window.confirmRestore = async function(id) {
+    if (!confirm("Bạn muốn khôi phục tài khoản này?")) return;
+
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/users/restore/${id}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+        });
+        if (response.ok) {
+            alert("Khôi phục thành công!");
+            fetchDeletedUsers();
+            loadAdminStats();
+        }
+    } catch (e) { alert("Lỗi khi khôi phục"); }
+};
+
+window.openEditUserModal = function(user) {
+    document.getElementById('edit-user-id').value = user.maNguoiDung;
+    document.getElementById('edit-user-name').value = user.tenNguoiDung;
+    document.getElementById('edit-user-email').value = user.email;
+    document.getElementById('edit-user-phone').value = user.soDienThoai;
+    document.getElementById('edit-user-role').value = user.role;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    modal.show();
+};
+
+window.handleAdminUpdateUser = async function() {
+    const id = document.getElementById('edit-user-id').value;
+    const token = localStorage.getItem('access_token');
+    const updatedData = {
+        tenNguoiDung: document.getElementById('edit-user-name').value,
+        email: document.getElementById('edit-user-email').value,
+        soDienThoai: document.getElementById('edit-user-phone').value,
+        role: document.getElementById('edit-user-role').value
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/users/admin-edit/${id}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`, 
+                'Accept': 'application/json' 
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (response.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+            alert("Cập nhật thành công!");
+            fetchUserList();
+        } else {
+            alert(data.message || "Có lỗi xảy ra khi cập nhật!");
+        }
+    } catch (e) { alert("Lỗi khi cập nhật"); }
+};
+
 window.showAdminContent = function(type) {
     const subContent = document.getElementById('admin-sub-content');
     if (!subContent) return;
@@ -33,7 +177,14 @@ window.showAdminContent = function(type) {
                 <div class="card shadow-sm border-0 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3 class="fw-bold mb-0 text-primary">QUẢN LÝ NGƯỜI DÙNG</h3>
-                        <button class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Thêm User</button>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary btn-sm active" id="btn-active-users" onclick="fetchUserList()">
+                                <i class="bi bi-person-check"></i> Đang hoạt động
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" id="btn-deleted-users" onclick="fetchDeletedUsers()">
+                                <i class="bi bi-person-x"></i> Thùng rác
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive mt-3">
                         <table class="table table-hover align-middle">
@@ -42,16 +193,18 @@ window.showAdminContent = function(type) {
                                     <th>ID</th>
                                     <th>Họ tên</th>
                                     <th>Email</th>
+                                    <th>Số điện thoại</th>
                                     <th>Vai trò</th>
-                                    <th>Thao tác</th>
+                                    <th class="text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody id="user-table-body">
-                                <tr><td colspan="5" class="text-center text-muted">Đang tải dữ liệu...</td></tr>
+                                <tr><td colspan="6" class="text-center py-4">Đang tải dữ liệu...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>`;
+            fetchUserList(); 
             break;
 
         case 'categories':

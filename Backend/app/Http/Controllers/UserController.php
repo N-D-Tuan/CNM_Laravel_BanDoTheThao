@@ -195,10 +195,16 @@ class UserController extends Controller
         $user->resetOtp = $otp;
         $user->resetOtpExpiry = now()->addMinutes(30);
         $user->save();
-
-        Mail::raw("Mã OTP xác nhận của bạn là: $otp. Mã này có hiệu lực trong 30 phút.", function ($message) use ($user) {
-            $message->to($user->email)->subject('Mã xác nhận đổi mật khẩu - LPT Store');
-        });
+       
+        try {
+            Mail::raw("Mã OTP xác nhận của bạn là: $otp. Mã này có hiệu lực trong 30 phút.", function ($message) use ($user) {
+                $message->to($user->email)->subject('Mã xác nhận đổi mật khẩu - LPT Store');
+            });
+        } catch (\Exception $e) {
+            $user->resetOtp = null;
+            $user->save();
+            return response()->json(['message' => 'Email của bạn không có thật hoặc không thể nhận tin nhắn lúc này.'], 500);
+        }
 
         return response()->json([
             'message' => 'Mã OTP đã được gửi về email của bạn'
@@ -262,9 +268,15 @@ class UserController extends Controller
         $user->resetOtpExpiry = now()->addMinutes(15);
         $user->save();
 
-        Mail::raw("Mã OTP đổi mật khẩu của bạn là: $otp. Mã có hiệu lực trong 15 phút.", function ($message) use ($user) {
-            $message->to($user->email)->subject('Xác nhận đổi mật khẩu - LPT Store');
-        });
+        try {
+            Mail::raw("Mã OTP xác nhận của bạn là: $otp. Mã này có hiệu lực trong 15 phút.", function ($message) use ($user) {
+                $message->to($user->email)->subject('Mã xác nhận đổi mật khẩu - LPT Store');
+            });
+        } catch (\Exception $e) {
+            $user->resetOtp = null;
+            $user->save();
+            return response()->json(['message' => 'Email của bạn không có thật hoặc không thể nhận tin nhắn lúc này.'], 500);
+        }
 
         return response()->json(['message' => 'Mã OTP đã được gửi về email']);
     }
