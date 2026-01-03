@@ -65,7 +65,9 @@ class SanPhamController extends Controller
         if ($request->filled('sort')) {
             match ($request->sort) {
                 'newest'       => $query->orderByDesc('created_at'),
-                'best-seller'  => $query->orderByDesc('soLuongBan'), // nếu có cột
+                'best-seller' => $query
+                    ->withSum('chitietdonhangs as soLuongBan', 'soLuong')
+                    ->orderByDesc('soLuongBan'),
                 'price-asc'    => $query->orderBy('giaBan'),
                 'price-desc'   => $query->orderByDesc('giaBan'),
                 default        => $query
