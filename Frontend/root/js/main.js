@@ -15,6 +15,10 @@ async function showPage(pageName) {
         }
     }
 
+    if (pageName === 'admin-dashboard') {
+        window.loadAdminStats();
+    }
+
     if (pageName === 'trang-chu') {
         const myCarousel = document.querySelector('#homeAboutCarousel');
         if (myCarousel) {
@@ -30,8 +34,8 @@ async function showPage(pageName) {
     }
     if (pageName === 'san-pham') {
         if (typeof window.initProductPage === 'function') {
-        setTimeout(() => window.initProductPage(), 100);
-    }
+            setTimeout(() => window.initProductPage(), 100);
+        }
     }
     window.scrollTo(0, 0);
 }
