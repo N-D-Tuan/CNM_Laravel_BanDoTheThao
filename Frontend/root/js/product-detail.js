@@ -39,6 +39,8 @@ async function fetchProductDetailData(id) {
             imgUrl = product.hinhAnh.startsWith('http') ? product.hinhAnh : `${SERVER_URL}/storage/${product.hinhAnh}`;
         }
         document.getElementById("detail-image").src = imgUrl;
+        
+        setupDetailAddToCart(product);
     } catch (error) { console.error("Lỗi:", error); }
 }
 
@@ -273,3 +275,77 @@ window.submitReview = async function(event) {
         console.error("Lỗi gửi đánh giá:", error);
     }
 };
+
+window.updateDetailQty = function(step) {
+    const input = document.getElementById('detail-quantity');
+    if (!input) return;
+    
+    let currentVal = parseInt(input.value) || 1;
+    let newVal = currentVal + step;
+    
+    if (newVal >= 1) {
+        input.value = newVal;
+    }
+};
+
+function setupDetailAddToCart(product) {
+    const btn = document.getElementById('btn-add-to-cart');
+    const qtyInput = document.getElementById('detail-quantity');
+    if (!btn || !qtyInput) return;
+
+    // Reset sự kiện để tránh lặp lại trong SPA
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.addEventListener('click', async function() {
+        const token = localStorage.getItem('access_token');
+        const quantity = parseInt(qtyInput.value) || 1; // Lấy số lượng thực tế từ trang
+        
+        // 1. Kiểm tra đăng nhập
+        if (!token) {
+            if (typeof showNotification === 'function') {
+                showNotification('⚠️ Vui lòng đăng nhập để mua hàng!', 'warning');
+            }
+            setTimeout(() => { if (typeof showPage === 'function') showPage('login'); }, 1000);
+            return;
+        }
+
+        // 2. Trạng thái Loading
+        this.disabled = true;
+        const originalContent = this.innerHTML;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/giohang`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    maSanPham: product.maSanPham,
+                    soLuong: quantity // Gửi số lượng người dùng đã chọn
+                })
+            });
+
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+                if (typeof showNotification === 'function') {
+                    showNotification(`✓ Đã thêm ${quantity} "${product.tenSanPham}" vào giỏ hàng!`, 'success');
+                }
+                // Cập nhật Badge trên Header
+                if (typeof updateCartCount === 'function') updateCartCount();
+            } else {
+                alert(result.message || 'Lỗi thêm vào giỏ hàng');
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+            alert('Không thể kết nối máy chủ');
+        } finally {
+            this.disabled = false;
+            this.innerHTML = originalContent;
+        }
+    });
+}

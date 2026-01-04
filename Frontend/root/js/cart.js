@@ -14,10 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ================== AUTH ================== */
 function checkAuth() {
     const token = localStorage.getItem('access_token');
-    
-    console.log('=== DEBUG CART AUTH ===');
-    console.log('Token:', token);
-    
+
     if (!token) {
         console.error('Không có token!');
         // Chuyển về trang đăng nhập
@@ -37,15 +34,17 @@ async function loadCart() {
     
     const token = localStorage.getItem('access_token');
 
-    document.getElementById('loadingState').style.display = 'block';
-    document.getElementById('cartContent').style.display = 'none';
-    document.getElementById('emptyCart').style.display = 'none';
+    const loadingEl = document.getElementById('loadingState');
+    const contentEl = document.getElementById('cartContent');
+    const emptyEl = document.getElementById('emptyCart');
+
+    if (!loadingEl || !contentEl || !emptyEl) return;
+
+    loadingEl.style.display = 'block';
+    contentEl.style.display = 'none';
+    emptyEl.style.display = 'none';
 
     try {
-        console.log('=== LOADING CART ===');
-        console.log('API URL:', `${API_URL}/giohang`);
-        console.log('Token:', token);
-
         const res = await fetch(`${API_URL}/giohang`, {
             method: 'GET',
             headers: {
@@ -55,11 +54,8 @@ async function loadCart() {
             }
         });
 
-        console.log('Response status:', res.status);
-
         // Xử lý lỗi 401 - Token hết hạn
         if (res.status === 401) {
-            console.error('Token hết hạn!');
             localStorage.clear();
             showNotification('⚠️ Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!', 'warning');
             setTimeout(() => {
@@ -73,7 +69,6 @@ async function loadCart() {
         }
 
         const result = await res.json();
-        console.log('Response data:', result);
 
         document.getElementById('loadingState').style.display = 'none';
 
@@ -224,46 +219,49 @@ async function removeFromCart(id) {
 }
 
 /* ================== CLEAR CART ================== */
-async function clearCart() {
-    if (!confirm('Xóa toàn bộ giỏ hàng?')) return;
+window.clearCart = async function() {
+    if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?')) return;
 
     const token = localStorage.getItem('access_token');
+    if (!token) return;
 
     try {
         const res = await fetch(`${API_URL}/giohang`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
             }
         });
 
         const result = await res.json();
 
-        if (res.ok && result.success) {
+        if (res.ok) {
             showNotification('✓ Đã xóa toàn bộ giỏ hàng!', 'success');
-            loadCart();
+            // Cập nhật lại giao diện ngay lập tức
+            cartData = { items: [], tongTien: 0, soLuongSanPham: 0 };
+            showEmptyCart();
+            // Cập nhật badge giỏ hàng trên Header nếu có
+            if (typeof updateCartBadge === 'function') updateCartBadge();
         } else {
             showNotification(result.message || 'Lỗi xóa!', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
-        showNotification('❌ Không thể xóa!', 'error');
+        showNotification('❌ Không thể kết nối đến server!', 'error');
     }
 }
 
 /* ================== CHECKOUT ================== */
-function checkout() {
-    if (cartData.items.length === 0) {
-        showNotification('⚠️ Giỏ hàng trống!', 'warning');
+window.checkout = function() {
+    if (!cartData.items || cartData.items.length === 0) {
+        showNotification('⚠️ Giỏ hàng của bạn đang trống!', 'warning');
         return;
     }
     
-    // Chuyển đến trang thanh toán
     if (typeof showPage === 'function') {
         showPage('thanh-toan');
-    } else {
-        window.location.href = '#thanh-toan';
     }
 }
 

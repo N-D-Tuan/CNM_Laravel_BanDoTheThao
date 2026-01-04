@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-md-5 mb-4">
             <div class="card border-0 shadow-sm">
-                <img id="detail-image" src="https://via.placeholder.com/500" class="card-img-top img-fluid rounded" alt="Ảnh sản phẩm" style="object-fit: contain; max-height: 500px; width: 100%;">
+                <img id="detail-image" src="" class="card-img-top img-fluid rounded" alt="Ảnh sản phẩm" style="object-fit: contain; max-height: 500px; width: 100%;">
             </div>
         </div>
 
@@ -31,12 +31,17 @@
             </div>
 
             <div class="d-flex align-items-center gap-3 mt-4">
-                <div class="input-group" style="width: 120px;">
-                    <button class="btn btn-outline-secondary" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-</button>
-                    <input type="number" class="form-control text-center" value="1" min="1">
-                    <button class="btn btn-outline-secondary" type="button" onclick="this.parentNode.querySelector('input[type=number]').stepUp()">+</button>
+                <div class="quantity-control d-flex align-items-center border rounded" style="width: fit-content;">
+                    <button class="btn btn-link text-dark py-2 px-3" onclick="updateDetailQty(-1)">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <input type="number" id="detail-quantity" class="form-control border-0 text-center fw-bold" 
+                        value="1" min="1" style="width: 60px; box-shadow: none;">
+                    <button class="btn btn-link text-dark py-2 px-3" onclick="updateDetailQty(1)">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
-                <button class="btn btn-primary btn-lg flex-grow-1 shadow-sm">
+                <button id="btn-add-to-cart" class="btn btn-primary btn-lg flex-grow-1 shadow-sm">
                     <i class="fa-solid fa-cart-shopping me-2"></i> Thêm vào giỏ hàng
                 </button>
             </div>

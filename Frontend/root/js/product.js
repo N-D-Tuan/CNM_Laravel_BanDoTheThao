@@ -269,18 +269,11 @@ function setupAddToCartButtons() {
             const productId = this.dataset.productId;
             const productName = this.dataset.productName;
 
-            // ✅ SỬA: Đổi thành access_token
             const token = localStorage.getItem('access_token');
-            
-            // 🔍 DEBUG
-            console.log('=== DEBUG ADD TO CART ===');
-            console.log('Token:', token);
-            console.log('Product ID:', productId);
             
             if (!token) {
                 showNotification('⚠️ Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'warning');
                 
-                // ✅ SỬA: Sử dụng showPage thay vì window.location.href
                 setTimeout(() => {
                     if (typeof showPage === 'function') {
                         showPage('login');
@@ -309,9 +302,7 @@ function setupAddToCartButtons() {
                     })
                 });
 
-                console.log('Response status:', res.status);
                 const result = await res.json();
-                console.log('Response data:', result);
 
                 if (res.ok && result.success) {
                     showNotification(`✓ Đã thêm "${productName}" vào giỏ hàng!`, 'success');
