@@ -52,8 +52,19 @@ window.renderUserOrders = (filterStatus = "Tất cả", activeTab = null) => {
 function renderUserOrderCard(order) {
   const firstItem = order.items[0]
   const otherCount = order.items.length - 1
-  // const canCancel = order.status === "Chờ duyệt" || order.status === "Đang giao"
-  const canCancel = order.status === "Chờ duyệt"
+
+  let actionButton = "";
+  if (order.status === "Chờ duyệt") {
+    actionButton = `
+      <button class="btn btn-outline-danger btn-sm px-4 rounded-pill" onclick="event.stopPropagation(); handleUserCancelOrder('${order.id}')">
+          Hủy đơn hàng
+      </button>`;
+  } else if (order.status === "Đã giao") {
+    actionButton = `
+      <button class="btn btn-outline-primary btn-sm px-4 rounded-pill" onclick="event.stopPropagation(); showEvaluationModal('${order.id}')">
+          Đánh giá sản phẩm
+      </button>`;
+  }
 
   return `
         <div class="card mb-3 border-0 shadow-sm user-order-card" onclick="showUserOrderDetail('${order.id}')">
@@ -80,14 +91,7 @@ function renderUserOrderCard(order) {
                 <span class="text-muted small" style='margin-right: 20px;'><i class="bi bi-clock me-1"></i>${order.date}</span>
                 <span class="text-muted small";></i><span style='font-weight: bold'>Địa điểm nhận hàng:</span> ${order.address}</span>
               </div>
-                ${canCancel
-      ? `
-                    <button class="btn btn-outline-danger btn-sm px-4 rounded-pill" onclick="event.stopPropagation(); handleUserCancelOrder('${order.id}')">
-                        Hủy đơn hàng
-                    </button>
-                `
-      : ""
-    }
+              ${actionButton}
             </div>
         </div>
     `
@@ -152,12 +156,17 @@ window.showUserOrderDetail = (id) => {
         </div>
     `
 
-  // const canCancel = order.status === "Chờ duyệt" || order.status === "Đang giao"
-  const canCancel = order.status === "Chờ duyệt"
-  modalFooter.innerHTML = canCancel
-    ? `<button class="btn btn-danger w-100 py-2 fw-bold" onclick="handleUserCancelOrder('${order.id}')">HỦY ĐƠN HÀNG</button>`
-    : `<button class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Đóng</button>`
+  let footerHtml = "";
+  if (order.status === "Chờ duyệt") {
+    footerHtml = `<button class="btn btn-danger w-100 py-2 fw-bold" onclick="handleUserCancelOrder('${order.id}')">HỦY ĐƠN HÀNG</button>`;
+  } else if (order.status === "Đang giao") {
+    footerHtml = `<button class="btn btn-success w-100 py-2 fw-bold" onclick="handleConfirmReceived('${order.id}')">ĐÃ NHẬN ĐƯỢC HÀNG</button>`;
+  } else {
+    footerHtml = `<button class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Đóng</button>`;
+  }
 
+  modalFooter.innerHTML = footerHtml;
+  
   const bootstrap = window.bootstrap
   const myModal = new bootstrap.Modal(document.getElementById("userOrderDetailModal"))
   myModal.show()
@@ -200,4 +209,40 @@ window.handleUserCancelOrder = async (id) => {
       alert("Lỗi kết nối server");
     }
   }
+}
+
+window.handleConfirmReceived = async (id) => {
+  if (confirm(`Bạn xác nhận đã nhận được đơn hàng số ${id}?`)) {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/donhang/${id}/trangthai`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          trangThai: "Đã giao"
+        })
+      });
+
+      const data = await res.json();
+      if (data.status) {
+        alert("Cảm ơn bạn đã xác nhận nhận hàng!");
+        
+        await window.loadUserOrders();
+        window.renderUserOrders("Tất cả");
+
+        const modal = window.bootstrap.Modal.getInstance(document.getElementById("userOrderDetailModal"));
+        if (modal) modal.hide();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi kết nối server khi cập nhật trạng thái");
+    }
+  }
+}
+
+window.showEvaluationModal = (id) => {
+    alert("Chức năng đánh giá cho đơn hàng " + id + " đang được phát triển.");
+    // Bạn có thể showPage('danh-gia') hoặc mở modal đánh giá tại đây
 }
