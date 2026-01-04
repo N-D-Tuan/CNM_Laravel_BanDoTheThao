@@ -107,4 +107,28 @@ ALTER TABLE DonHang ADD CONSTRAINT CHK_TrangThai CHECK (trangThai IN ('Chờ duy
 ALTER TABLE User ADD COLUMN remember_token VARCHAR(100) NULL AFTER role; 
 
 -- 7. Bổ sung cột cho Sản phẩm
-ALTER TABLE sanpham ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+ALTER TABLE sanpham ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP;
+
+-- 8. Bổ sung cột cho Giỏ hàng
+ALTER TABLE GioHang ADD COLUMN soLuong INT DEFAULT 1;
+
+-- 3. Chèn dữ liệu Danh mục
+INSERT INTO DanhMucSanPham (tenDanhMuc) VALUES 
+('Giày Bóng Đá'),
+('Áo Đấu Câu Lạc Bộ'),
+('Dụng Cụ Tập Gym'),
+('Phụ Kiện Thể Thao');
+
+-- 4. Chèn dữ liệu Sản phẩm
+INSERT INTO SanPham (tenSanPham, soLuongTon, giaNhap, giaBan, hinhAnh, moTa, maDanhMuc) VALUES 
+('Giày Nike Mercurial', 50, 1500000, 2200000, 'nike_merc.jpg', 'Giày bóng đá cao cấp dành cho sân cỏ nhân tạo.', 1),
+('Áo Manchester United 2024', 100, 300000, 550000, 'mu_home.jpg', 'Áo đấu sân nhà mùa giải mới nhất.', 2),
+('Tạ tay Rubber 5kg', 30, 200000, 350000, 'ta_tay_5kg.jpg', 'Tạ tay bọc cao su bền bỉ.', 3),
+('Băng cuốn cổ chân', 200, 20000, 50000, 'bang_co_chan.jpg', 'Bảo vệ cổ chân khi vận động mạnh.', 4);
+
+-- 5. Chèn dữ liệu Tính năng
+INSERT INTO TinhNangSanPham (maSanPham, tenTinhNang) VALUES 
+(1, 'Chống nước'),
+(1, 'Siêu nhẹ'),
+(2, 'Thoát mồ hôi cực tốt'),
+(3, 'Cầm nắm chống trượt');

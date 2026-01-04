@@ -1,0 +1,135 @@
+:root {
+    --primary-color: #0d6efd;
+    --bg-light: #f8f9fa;
+    --border-color: #e9ecef;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Inter', sans-serif;
+}
+
+.section-title {
+    font-weight: 700;
+    color: #333;
+}
+
+/* Card sản phẩm trong giỏ */
+.cart-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s ease;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item:hover {
+    background-color: #fcfcfc;
+}
+
+.cart-item-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.cart-item-info h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.cart-item-category {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.cart-item-price {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* Bộ điều khiển số lượng */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    width: fit-content;
+}
+
+.quantity-btn {
+    background: white;
+    border: none;
+    padding: 0.2rem 0.8rem;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+}
+
+.quantity-btn:hover:not(:disabled) {
+    background: #eee;
+}
+
+.quantity-input {
+    width: 45px;
+    border: none !important;
+    text-align: center;
+    font-weight: 600;
+    background: white !important;
+}
+
+/* Nút xóa */
+.btn-remove {
+    color: #dc3545;
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.btn-remove:hover {
+    color: #a71d2a;
+    text-decoration: underline;
+}
+
+/* Giỏ hàng trống */
+.empty-cart-icon {
+    font-size: 5rem;
+    color: #dee2e6;
+}
+
+/* Toast Notification (Sửa lỗi hiển thị thông báo) */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    min-width: 300px;
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cart-item-img {
+        width: 70px;
+        height: 70px;
+    }
+}

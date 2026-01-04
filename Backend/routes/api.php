@@ -51,13 +51,24 @@ Route::get('/tinh-nang/{maSanPham}', [TinhNangController::class, 'xemTinhNang'])
 Route::put('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'suaTinhNang']);
 Route::delete('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'xoaTinhNang']);
 Route::get('/tinh-nang', [TinhNangController::class, 'xemTatCaTinhNang']);
-// Routes cho Giỏ hàng - CHỈ ĐỊNH NGHĨA 1 LẦN
-Route::get('/giohang/count', [GioHangController::class, 'count']);      // Phải để TRƯỚC /giohang/{maSanPham}
-Route::get('/giohang', [GioHangController::class, 'index']);           
-Route::post('/giohang', [GioHangController::class, 'store']);        
-Route::delete('/giohang/{maSanPham}', [GioHangController::class, 'destroy']);
-Route::delete('/giohang', [GioHangController::class, 'clear']);       
 
+// ==================== ROUTES GIỎ HÀNG (CẦN ĐĂNG NHẬP) ====================
+Route::middleware('auth:sanctum')->group(function () {
+    // Giỏ hàng
+    Route::get('/giohang/count', [GioHangController::class, 'count']);
+    Route::get('/giohang', [GioHangController::class, 'index']);           
+    Route::post('/giohang', [GioHangController::class, 'store']);        
+    Route::put('/giohang/{maSanPham}', [GioHangController::class, 'update']);
+    Route::delete('/giohang/{maSanPham}', [GioHangController::class, 'destroy']);
+    Route::delete('/giohang', [GioHangController::class, 'clear']);
+    
+    // Đơn hàng
+    Route::get('/donhang', [DonHangController::class, 'index']);
+    Route::post('/donhang', [DonHangController::class, 'store']);
+    Route::get('/donhang/user/{id}', [DonHangController::class, 'getByUser']);
+    Route::get('/donhang/{id}', [DonHangController::class, 'getByMaDonHang']);
+    Route::put('/donhang/{id}/trangthai', [DonHangController::class, 'updateTrangThai']);
+});
 // Routes cho Danh mục sản phẩm
 Route::get('/danhmucsanpham', [DanhMucSanPhamController::class, 'index']);        
 Route::get('/danhmucsanpham/{id}', [DanhMucSanPhamController::class, 'show']);  
