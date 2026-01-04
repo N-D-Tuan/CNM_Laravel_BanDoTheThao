@@ -13,13 +13,14 @@ class DanhGiaController extends Controller
     {
         $request->validate([
             'maSanPham' => 'required|exists:SanPham,maSanPham', 
+            'maNguoiDung' => 'required|exists:User,maNguoiDung',
             'soSao'     => 'required|integer|min:1|max:5',      
             'binhLuan'  => 'nullable|string',
         ]);
 
         try {
             $danhGia = Danhgiasanpham::create([
-                'maNguoiDung' => 1, 
+                'maNguoiDung' => $request->maNguoiDung,
                 'maSanPham'   => $request->maSanPham,
                 'soSao'       => $request->soSao,
                 'binhLuan'    => $request->binhLuan,

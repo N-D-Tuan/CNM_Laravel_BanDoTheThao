@@ -11,6 +11,9 @@ use App\Http\Controllers\TinhNangController;
 use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\DanhMucSanPhamController;
 
+
+Route::get('/tinh-nang/xem/{id}', [TinhNangController::class, 'xemTinhNang']);
+
 Route::post('/danh-gia', [DanhGiaController::class, 'store']);
 Route::get('/danh-gia/{maSanPham}', [DanhGiaController::class, 'index']);
 Route::get('/danh-muc', [DanhMucController::class, 'index']);

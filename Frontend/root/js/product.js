@@ -90,19 +90,36 @@ function renderProducts(products) {
     grid.innerHTML = '';
 
     if (!products.length) {
-        grid.innerHTML = `<p class="text-center text-muted">Không có sản phẩm</p>`;
+        grid.innerHTML = `<div class="col-12"><p class="text-center text-muted">Không tìm thấy sản phẩm nào</p></div>`;
         return;
     }
 
     products.forEach(p => {
+        const priceFormatted = Number(p.giaBan).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+        
+        // SỬA LẠI ĐOẠN NÀY:
+        // Thay imgUrl bằng logic của bạn
+        const imgSrc = p.hinhAnh 
+            ? (p.hinhAnh.startsWith('http') ? p.hinhAnh : `http://127.0.0.1:8000/storage/${p.hinhAnh}`) 
+            : 'https://via.placeholder.com/300';
+
         grid.innerHTML += `
             <div class="product-card">
-                <img src="${p.hinhAnh || ''}">
+                <a href="#" onclick="showProductDetail(${p.maSanPham}); return false;" class="d-block">
+                    <img src="${imgSrc}" class="img-fluid" style="width:100%; height: 250px; object-fit: cover;">
+                </a>
+                
                 <div class="card-body text-center">
-                    <h5>${p.tenSanPham}</h5>
+                    <h5>
+                        <a href="#" onclick="showProductDetail(${p.maSanPham}); return false;" class="text-decoration-none text-dark fw-bold">
+                            ${p.tenSanPham}
+                        </a>
+                    </h5>
+                    
                     <p class="text-success fw-bold">
-                        ${Number(p.giaBan).toLocaleString()} VNĐ
+                        ${priceFormatted}
                     </p>
+                    
                     <button class="btn btn-primary w-100">Thêm vào giỏ</button>
                 </div>
             </div>
