@@ -52,7 +52,8 @@ window.renderUserOrders = (filterStatus = "Tất cả", activeTab = null) => {
 function renderUserOrderCard(order) {
   const firstItem = order.items[0]
   const otherCount = order.items.length - 1
-  const canCancel = order.status === "Chờ duyệt" || order.status === "Đang giao"
+  // const canCancel = order.status === "Chờ duyệt" || order.status === "Đang giao"
+  const canCancel = order.status === "Chờ duyệt"
 
   return `
         <div class="card mb-3 border-0 shadow-sm user-order-card" onclick="showUserOrderDetail('${order.id}')">
@@ -151,7 +152,8 @@ window.showUserOrderDetail = (id) => {
         </div>
     `
 
-  const canCancel = order.status === "Chờ duyệt" || order.status === "Đang giao"
+  // const canCancel = order.status === "Chờ duyệt" || order.status === "Đang giao"
+  const canCancel = order.status === "Chờ duyệt"
   modalFooter.innerHTML = canCancel
     ? `<button class="btn btn-danger w-100 py-2 fw-bold" onclick="handleUserCancelOrder('${order.id}')">HỦY ĐƠN HÀNG</button>`
     : `<button class="btn btn-secondary w-100 py-2" data-bs-dismiss="modal">Đóng</button>`
