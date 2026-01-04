@@ -4,12 +4,24 @@ let mockOrders = [];
 let currentOrder = null;
 
 window.loadData = () => {
-  fetch("http://127.0.0.1:8000/api/donhang")
-  .then(res => res.json())
+  fetch(`http://127.0.0.1:8000/api/donhang`, {
+      headers: {
+          "Accept": "application/json", 
+          "Authorization": `Bearer ${localStorage.getItem('access_token')}`
+      }
+  })
+  .then(res => {
+      if (!res.ok) throw new Error("Server error");
+      return res.json();
+  })
   .then(result => {
       mockOrders = result.data;
       renderTable(mockOrders);
-  }).catch(err => console.error("Lỗi API: ", err));
+  }).catch(err => {
+      console.error("Lỗi API: ", err);
+      const tbody = document.getElementById("order-table-body");
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Lỗi máy chủ (500)</td></tr>`;
+  });
 }
 
 loadData();

@@ -14,7 +14,7 @@
         <i class="bi bi-cart-x" style="font-size: 5rem; color: #dee2e6;"></i>
         <h4 class="mt-3">Giỏ hàng trống</h4>
         <p class="text-muted">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
-        <a href="#/san-pham" class="btn btn-primary mt-3">
+        <a href="#" onclick="showPage('san-pham')" class="btn btn-primary mt-3">
             <i class="bi bi-shop"></i> Tiếp tục mua sắm
         </a>
     </div>
@@ -25,42 +25,48 @@
             <div id="cartItems"></div>
 
             <div class="d-flex justify-content-between mt-3">
-                <a href="#/san-pham" class="btn btn-outline-secondary">
+                <a href="#" onclick="showPage('san-pham')" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Tiếp tục mua sắm
                 </a>
-                <button id="clearCartBtn" class="btn btn-outline-danger">
+                <button id="clearCartBtn" class="btn btn-outline-danger" onclick="clearCart()">
                     <i class="bi bi-trash"></i> Xóa toàn bộ
                 </button>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="cart-summary">
-                <h4 class="mb-4">Tóm Tắt Đơn Hàng</h4>
+            <div class="cart-summary-container mt-4 mt-lg-0"> 
+                <div class="cart-summary p-4 bg-white rounded shadow-sm">
+                    <h4 class="fw-bold mb-4 pb-2 border-bottom">Tóm Tắt Đơn Hàng</h4>
 
-                <div class="summary-row">
-                    <span>Số lượng:</span>
-                    <strong id="totalItems">0</strong>
+                    <div class="summary-content">
+                        <div class="summary-row d-flex justify-content-between mb-2">
+                            <span class="text-muted">Số lượng sản phẩm:</span>
+                            <strong id="totalItems">0</strong>
+                        </div>
+
+                        <div class="summary-row d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tạm tính:</span>
+                            <strong id="subtotal">0 VNĐ</strong>
+                        </div>
+
+                        <div class="summary-row d-flex justify-content-between mb-3">
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <strong class="text-success">Miễn phí</strong>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="summary-total d-flex justify-content-between align-items-center mb-4">
+                            <span class="fs-5 fw-bold">Tổng thanh toán:</span>
+                            <span id="totalPrice" class="fs-3 fw-bold text-danger">0 VNĐ</span>
+                        </div>
+
+                        <button id="checkoutBtn" class="btn btn-success btn-lg w-100 py-3 fw-bold shadow-sm" onclick="checkout()">
+                            <i class="bi bi-credit-card-2-front me-2"></i> Thanh Toán Ngay
+                        </button>
+                    </div>
                 </div>
-
-                <div class="summary-row">
-                    <span>Tạm tính:</span>
-                    <strong id="subtotal">0 VNĐ</strong>
-                </div>
-
-                <div class="summary-row">
-                    <span>Phí ship:</span>
-                    <strong class="text-success">Miễn phí</strong>
-                </div>
-
-                <div class="summary-row border-top pt-3">
-                    <span class="fs-5">Tổng:</span>
-                    <span id="totalPrice" class="fs-4 fw-bold text-success">0 VNĐ</span>
-                </div>
-
-                <button id="checkoutBtn" class="btn btn-success btn-lg w-100 mt-3">
-                    <i class="bi bi-credit-card"></i> Thanh Toán
-                </button>
             </div>
         </div>
     </div>
