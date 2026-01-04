@@ -123,4 +123,30 @@ function fillProfileData() {
     }
 }
 
+// Hàm hiển thị chi tiết sản phẩm (Gọi từ product.js)
+async function showProductDetail(id) {
+    const mainContent = document.getElementById('main-content');
+    
+    // 1. Tải file HTML (chỉ phần body)
+    const res = await fetch('pages/product-detail.html');
+    const html = await res.text();
+    
+    // 2. Gán vào main-content (giữ nguyên Header/Footer của index.html)
+    mainContent.innerHTML = html;
+    
+    // 3. Đảm bảo Footer hiển thị
+    const footer = document.getElementById('footer-placeholder');
+    if (footer) footer.style.display = 'block';
+
+    // 4. Cuộn lên đầu trang
+    window.scrollTo(0, 0);
+
+    // 5. Gọi hàm load dữ liệu từ file product-detail.js
+    if (typeof window.loadProductDetail === 'function') {
+        window.loadProductDetail(id);
+    } else {
+        console.error("Không tìm thấy hàm loadProductDetail. Kiểm tra lại việc nhúng file script.");
+    }
+}
+
 window.onload = init;
