@@ -48,7 +48,9 @@ Route::get('/tinh-nang/{maSanPham}', [TinhNangController::class, 'xemTinhNang'])
 Route::put('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'suaTinhNang']);
 Route::delete('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'xoaTinhNang']);
 Route::get('/tinh-nang', [TinhNangController::class, 'xemTatCaTinhNang']);
+
 // Routes cho Giỏ hàng - CHỈ ĐỊNH NGHĨA 1 LẦN
+Route::put('/giohang/{maSanPham}', [GioHangController::class, 'update']);
 Route::get('/giohang/count', [GioHangController::class, 'count']);      // Phải để TRƯỚC /giohang/{maSanPham}
 Route::get('/giohang', [GioHangController::class, 'index']);           
 Route::post('/giohang', [GioHangController::class, 'store']);        
