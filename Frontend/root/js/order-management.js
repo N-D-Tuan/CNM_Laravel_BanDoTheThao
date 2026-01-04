@@ -218,8 +218,10 @@ window.handleAction = async (action, id, fromModal = false) => {
   let trangThai = '';
   if(action === 'approve') {
     trangThai = 'Đang giao';
+    if(!confirm(`Duyệt đơn hàng ${id}`)) return;
   } else if(action === 'cancel') {
     trangThai = 'Đã hủy';
+    if(!confirm(`Hủy đơn hàng ${id}`)) return;
   }
 
   try {
