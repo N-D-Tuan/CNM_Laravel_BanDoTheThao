@@ -52,6 +52,14 @@ async function showPage(pageName) {
         }
     }
     window.scrollTo(0, 0);
+
+    if (pageName === 'gio-hang') {
+    setTimeout(() => {
+        if (window.loadCart) {
+            window.loadCart();
+        }
+    }, 100);
+}
 }
 
 async function init() {

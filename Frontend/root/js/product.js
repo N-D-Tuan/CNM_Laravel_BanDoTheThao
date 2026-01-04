@@ -117,6 +117,7 @@ function renderProducts(products) {
 
     setupAddToCartButtons();
 }
+
 function renderPagination(meta) {
     const ul = document.getElementById('pagination');
     if (!ul) return;
@@ -168,8 +169,6 @@ function setupPriceFilter() {
 
     checkboxes.forEach(cb => {
         cb.addEventListener('change', function () {
-
-            // bỏ chọn → reset giá
             if (!this.checked) {
                 filters.minPrice = null;
                 filters.maxPrice = null;
@@ -177,7 +176,6 @@ function setupPriceFilter() {
                 return;
             }
 
-            // chỉ cho phép 1 checkbox
             checkboxes.forEach(c => c !== this && (c.checked = false));
 
             filters.minPrice = this.dataset.priceFrom
@@ -204,20 +202,19 @@ function setupSort() {
         reloadProducts();
     });
 }
+
 function setupSearch() {
     const searchBtn = document.getElementById('searchBtn');
     const searchInput = document.getElementById('searchInput');
 
     if (!searchBtn || !searchInput) return;
 
-    // Click tìm kiếm
     searchBtn.addEventListener('click', () => {
         filters.keyword = searchInput.value.trim();
         filters.page = 1;
         reloadProducts();
     });
 
-    // Nhấn Enter
     searchInput.addEventListener('keyup', e => {
         if (e.key === 'Enter') {
             filters.keyword = e.target.value.trim();
@@ -226,6 +223,7 @@ function setupSearch() {
         }
     });
 }
+
 /* ================== INIT ================== */
 function initProductPage() {
     loadCategories();
@@ -248,7 +246,6 @@ function setupAddToCartButtons() {
     
     buttons.forEach(btn => {
         btn.addEventListener('click', async function() {
-            // Vô hiệu hóa nút để tránh spam click
             this.disabled = true;
             const originalText = this.textContent;
             this.textContent = 'Đang xử lý...';
@@ -256,46 +253,74 @@ function setupAddToCartButtons() {
             const productId = this.dataset.productId;
             const productName = this.dataset.productName;
 
-            // Kiểm tra đăng nhập
-            const token = localStorage.getItem('authToken');
+            // ✅ SỬA: Đổi thành access_token
+            const token = localStorage.getItem('access_token');
+            
+            // 🔍 DEBUG
+            console.log('=== DEBUG ADD TO CART ===');
+            console.log('Token:', token);
+            console.log('Product ID:', productId);
+            
             if (!token) {
                 showNotification('⚠️ Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'warning');
+                
+                // ✅ SỬA: Sử dụng showPage thay vì window.location.href
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    if (typeof showPage === 'function') {
+                        showPage('login');
+                    } else {
+                        // Fallback cho trường hợp không có showPage
+                        window.location.href = '#login';
+                    }
                 }, 1500);
+                
+                this.disabled = false;
+                this.textContent = originalText;
                 return;
             }
 
             try {
-                // Gọi API thêm vào giỏ
                 const res = await fetch(`${API_URL}/giohang`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        maSanPham: productId,
-                        soLuong: 1 // Mặc định thêm 1 sản phẩm
+                        maSanPham: parseInt(productId),
+                        soLuong: 1
                     })
                 });
 
+                console.log('Response status:', res.status);
                 const result = await res.json();
+                console.log('Response data:', result);
 
-                if (result.success) {
-                    // Thành công
+                if (res.ok && result.success) {
                     showNotification(`✓ Đã thêm "${productName}" vào giỏ hàng!`, 'success');
-                    updateCartCount(); // Cập nhật badge số lượng
+                    updateCartCount();
                 } else {
-                    // Lỗi từ server
-                    showNotification(result.message || 'Có lỗi xảy ra!', 'error');
+                    // Xử lý lỗi 401 - token hết hạn
+                    if (res.status === 401) {
+                        showNotification('⚠️ Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!', 'warning');
+                        localStorage.clear();
+                        setTimeout(() => {
+                            if (typeof showPage === 'function') {
+                                showPage('login');
+                            } else {
+                                window.location.href = '#login';
+                            }
+                        }, 1500);
+                    } else {
+                        showNotification(result.message || 'Có lỗi xảy ra!', 'error');
+                    }
                 }
 
             } catch (error) {
                 console.error('Lỗi khi thêm vào giỏ:', error);
                 showNotification('❌ Không thể kết nối tới server!', 'error');
             } finally {
-                // Khôi phục nút
                 this.disabled = false;
                 this.textContent = originalText;
             }
@@ -307,7 +332,6 @@ function setupAddToCartButtons() {
  * Hiển thị thông báo toast
  */
 function showNotification(message, type = 'success') {
-    // Xóa thông báo cũ nếu có
     const oldNotif = document.querySelector('.toast-notification');
     if (oldNotif) oldNotif.remove();
 
@@ -336,7 +360,6 @@ function showNotification(message, type = 'success') {
     
     document.body.appendChild(notification);
     
-    // Tự động xóa sau 3 giây
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease-in';
         setTimeout(() => notification.remove(), 300);
@@ -347,9 +370,10 @@ function showNotification(message, type = 'success') {
  * Cập nhật số lượng giỏ hàng trên header
  */
 async function updateCartCount() {
-    const token = localStorage.getItem('authToken');
+    // ✅ SỬA: Đổi thành access_token
+    const token = localStorage.getItem('access_token');
+    
     if (!token) {
-        // Không đăng nhập → ẩn badge
         const cartBadge = document.getElementById('cartCount');
         if (cartBadge) cartBadge.style.display = 'none';
         return;
@@ -358,7 +382,8 @@ async function updateCartCount() {
     try {
         const res = await fetch(`${API_URL}/giohang/count`, {
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
             }
         });
         

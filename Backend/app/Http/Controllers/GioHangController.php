@@ -87,12 +87,12 @@ class GioHangController extends Controller
                 ], 404);
             }
 
-            // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
+            // Kiểm tra đã có trong giỏ chưa
             $existing = Giohang::where('maNguoiDung', $maNguoiDung)
                 ->where('maSanPham', $maSanPham)
                 ->first();
 
-            // Tính tổng số lượng sẽ có trong giỏ
+            // Tính tổng số lượng
             $soLuongHienTai = $existing ? $existing->soLuong : 0;
             $tongSoLuong = $soLuongHienTai + $soLuongMuon;
 
@@ -101,22 +101,27 @@ class GioHangController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => "Không đủ hàng! Chỉ còn {$sanPham->soLuongTon} sản phẩm trong kho" . 
-                                 ($soLuongHienTai > 0 ? " (bạn đã có {$soLuongHienTai} trong giỏ)" : "")
+                                ($soLuongHienTai > 0 ? " (bạn đã có {$soLuongHienTai} trong giỏ)" : "")
                 ], 400);
             }
 
             if ($existing) {
-                // Đã có trong giỏ → cộng thêm số lượng
-                $existing->soLuong = $tongSoLuong;
-                $existing->save();
+                // ✅ CẬP NHẬT SỐ LƯỢNG (dùng update thay vì save)
+                Giohang::where('maNguoiDung', $maNguoiDung)
+                    ->where('maSanPham', $maSanPham)
+                    ->update(['soLuong' => $tongSoLuong]);
+
+                $updated = Giohang::where('maNguoiDung', $maNguoiDung)
+                    ->where('maSanPham', $maSanPham)
+                    ->first();
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Đã cập nhật số lượng trong giỏ hàng',
-                    'data' => $existing
+                    'data' => $updated
                 ], 200);
             } else {
-                // Chưa có → thêm mới
+                // ✅ THÊM MỚI (create vẫn hoạt động bình thường)
                 $gioHang = Giohang::create([
                     'maNguoiDung' => $maNguoiDung,
                     'maSanPham' => $maSanPham,
@@ -159,6 +164,7 @@ class GioHangController extends Controller
             $maNguoiDung = $request->user()->maNguoiDung;
             $soLuongMoi = $request->soLuong;
 
+            // ✅ KIỂM TRA TỒN TẠI
             $gioHang = Giohang::where('maNguoiDung', $maNguoiDung)
                 ->where('maSanPham', $maSanPham)
                 ->first();
@@ -170,7 +176,7 @@ class GioHangController extends Controller
                 ], 404);
             }
 
-            // Kiểm tra tồn kho
+            // ✅ KIỂM TRA TỒN KHO
             $sanPham = Sanpham::find($maSanPham);
             if ($soLuongMoi > $sanPham->soLuongTon) {
                 return response()->json([
@@ -179,13 +185,20 @@ class GioHangController extends Controller
                 ], 400);
             }
 
-            $gioHang->soLuong = $soLuongMoi;
-            $gioHang->save();
+            // ✅ UPDATE BẰNG QUERY BUILDER (không dùng save())
+            Giohang::where('maNguoiDung', $maNguoiDung)
+                ->where('maSanPham', $maSanPham)
+                ->update(['soLuong' => $soLuongMoi]);
+
+            // Lấy lại data sau khi update
+            $updatedCart = Giohang::where('maNguoiDung', $maNguoiDung)
+                ->where('maSanPham', $maSanPham)
+                ->first();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật số lượng thành công',
-                'data' => $gioHang
+                'data' => $updatedCart
             ], 200);
 
         } catch (\Exception $e) {
