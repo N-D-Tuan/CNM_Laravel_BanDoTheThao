@@ -1,0 +1,56 @@
+/* Tông màu chủ đạo */
+:root {
+    --primary-color: #0d6efd;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+  }
+  
+  .product-image-wrapper img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .product-image-wrapper img:hover {
+    transform: scale(1.02);
+  }
+  
+  .product-info-wrapper {
+    background: #fff;
+    border-radius: 12px;
+  }
+  
+  #product-features li {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color);
+    display: flex;
+    align-items: center;
+  }
+  
+  #product-features li::before {
+    content: "\f00c";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #198754;
+    margin-right: 10px;
+  }
+  
+  .rating-summary {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+  }
+  
+  .comment-item:last-child {
+    border-bottom: none !important;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .leading-relaxed {
+    line-height: 1.6;
+  }
+  
