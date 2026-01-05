@@ -198,7 +198,7 @@ function renderCategoryTable(categories) {
         <tr>
             <td>#${cat.maDanhMuc}</td>
             <td class="fw-bold text-primary">${cat.tenDanhMuc}</td>
-            <td class="text-center"><span class="badge bg-secondary">Unknown</span></td> <td class="text-center">
+            <td class="text-center">
                 <button class="btn btn-sm btn-warning me-1" onclick="promptEditCategory(${cat.maDanhMuc}, '${cat.tenDanhMuc}')">
                     <i class="bi bi-pencil"></i>
                 </button>
@@ -666,7 +666,6 @@ window.deleteFeature = async function(featureId) {
                                 <tr>
                                     <th>Mã DM</th>
                                     <th>Tên Danh Mục</th>
-                                    <th class="text-center">Số lượng SP</th>
                                     <th class="text-center">Thao tác</th>
                                 </tr>
                             </thead>
