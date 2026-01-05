@@ -7,6 +7,7 @@ use App\Models\Donhang;
 use App\Models\Sanpham;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Danhgiasanpham;
 
 class DonHangController extends Controller
 {
@@ -101,17 +102,45 @@ class DonHangController extends Controller
     {
         $donhangs = Donhang::where('maNguoiDung', $id)
             ->with('chitietdonhangs.sanpham')
+            ->orderBy('ngayDat', 'desc') // Sắp xếp đơn mới nhất lên đầu
             ->get();
 
-        $result = $donhangs->map(function ($dh) {
+        // 1. Lấy danh sách ID các sản phẩm user này ĐÃ đánh giá
+        $ratedProductIds = Danhgiasanpham::where('maNguoiDung', $id)
+                                ->pluck('maSanPham')
+                                ->toArray();
+
+        // 2. Map dữ liệu để thêm cờ is_rated
+        $result = $donhangs->map(function ($dh) use ($ratedProductIds) {
+            
+            // Logic kiểm tra: Đã đánh giá hết các món trong đơn chưa?
+            $isRated = true;
+            if ($dh->chitietdonhangs->isEmpty()) {
+                $isRated = false;
+            } else {
+                foreach ($dh->chitietdonhangs as $ct) {
+                    // Nếu có món nào chưa nằm trong danh sách đã đánh giá => Coi như đơn này chưa xong
+                    if (!in_array($ct->maSanPham, $ratedProductIds)) {
+                        $isRated = false;
+                        break;
+                    }
+                }
+            }
+
             return [
                 'id' => $dh->maDonHang,
                 'date' => $dh->ngayDat?->format('d/m/Y H:i'),
                 'status' => $dh->trangThai,
                 'total' => $dh->tongTien,
                 'address' => $dh->diaChi,
+                
+                // 👇 QUAN TRỌNG: Thêm dòng này để Frontend biết mà hiện nút
+                'is_rated' => $isRated, 
+                // --------------------------------------------------------
+
                 'items' => $dh->chitietdonhangs->map(function ($ct) {
                     return [
+                        'maSanPham' => $ct->sanpham->maSanPham ?? null,
                         'name' => $ct->sanpham->tenSanPham ?? '',
                         'qty' => $ct->soLuong,
                         'price' => $ct->sanpham->giaBan ?? 0,

@@ -37,18 +37,18 @@
 </div>
 
 <!-- Modal Chi tiết đơn hàng -->
-<div class="modal fade" id="userOrderDetailModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-dark text-white border-0 py-3">
-                <h5 class="modal-title fw-bold" id="userOrderDetailTitle">Chi tiết đơn hàng</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-warning text-dark border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="bi bi-star-fill me-2"></i>Đánh giá sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-0" id="userOrderDetailBody">
-                <!-- Nội dung chi tiết render từ JS -->
-            </div>
-            <div class="modal-footer border-0 p-3" id="userOrderDetailFooter">
-                <!-- Nút thao tác -->
+            <div class="modal-body bg-light" id="ratingModalBody" style="max-height: 70vh; overflow-y: auto;">
+                </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary fw-bold px-4" onclick="submitProductReviews()">Gửi đánh giá</button>
             </div>
         </div>
     </div>
