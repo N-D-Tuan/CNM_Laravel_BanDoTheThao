@@ -3,9 +3,6 @@ async function handleLogin() {
     const matKhau = document.getElementById('password').value;
     const alertDiv = document.getElementById('login-alert');
 
-    console.log("--- Bắt đầu quá trình Đăng nhập ---");
-    console.log("Dữ liệu gửi đi:", { email, matKhau });
-
     alertDiv.classList.add('d-none');
     alertDiv.classList.remove('alert-danger', 'alert-success');
 
@@ -19,12 +16,9 @@ async function handleLogin() {
             body: JSON.stringify({ email, matKhau })
         });
 
-        console.log("Trạng thái HTTP Response:", response.status);
         const data = await response.json();
-        console.log("Dữ liệu nhận về từ Backend:", data);
 
         if (response.ok) {
-            console.log("Đăng nhập thành công! Đang lưu vào localStorage...");
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('access_token', data.access_token);
 
@@ -33,7 +27,6 @@ async function handleLogin() {
             alertDiv.classList.add('alert-success');
 
             setTimeout(() => {
-                console.log("Đang chuyển về trang chủ và vẽ lại Header...");
                 showPage('trang-chu');
                 renderHeader();
             }, 1000);
