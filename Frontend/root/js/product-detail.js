@@ -28,6 +28,9 @@ async function fetchProductDetailData(id) {
         const response = await fetch(`${API_BASE_URL}/san-pham/${id}`);
         const product = await response.json();
         
+        console.log("Dữ liệu sản phẩm:", product); 
+        console.log("Số lượng tồn:", product.soLuongTon);
+
         document.getElementById("detail-name").innerText = product.tenSanPham;
         document.getElementById("breadcrumb-name").innerText = product.tenSanPham;
         document.getElementById("detail-price").innerText = Number(product.giaBan).toLocaleString('vi-VN') + ' VNĐ';
@@ -40,7 +43,29 @@ async function fetchProductDetailData(id) {
         }
         document.getElementById("detail-image").src = imgUrl;
         
-        setupDetailAddToCart(product);
+        const statusEl = document.getElementById("product-status");
+        let isOutOfStock = false;
+
+        if (statusEl) {
+            // Kiểm tra số lượng tồn (Nếu null hoặc <= 0 coi như hết hàng)
+            const soLuongTon = product.soLuongTon || 0;
+
+            if (soLuongTon > 0) {
+                // CÒN HÀNG
+                statusEl.innerHTML = `
+                    <span class="badge bg-success">Còn hàng</span> 
+                    <span class="text-muted ms-2 small">(Tồn kho: ${soLuongTon})</span>`;
+                isOutOfStock = false;
+            } else {
+                // HẾT HÀNG
+                statusEl.innerHTML = `
+                    <span class="badge bg-danger">Hết hàng</span> 
+                    <span class="text-muted ms-2 small">(Tồn kho: 0)</span>`;
+                isOutOfStock = true;
+            }
+        }
+        setupDetailAddToCart(product, isOutOfStock); 
+        
     } catch (error) { console.error("Lỗi:", error); }
 }
 
@@ -288,20 +313,39 @@ window.updateDetailQty = function(step) {
     }
 };
 
-function setupDetailAddToCart(product) {
+function setupDetailAddToCart(product, isOutOfStock) {
     const btn = document.getElementById('btn-add-to-cart');
     const qtyInput = document.getElementById('detail-quantity');
     if (!btn || !qtyInput) return;
 
-    // Reset sự kiện để tránh lặp lại trong SPA
+    // Reset sự kiện
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
 
+    // 1. Logic khóa nút khi hết hàng
+    if (isOutOfStock) {
+        newBtn.disabled = true;
+        newBtn.classList.remove('btn-primary');
+        newBtn.classList.add('btn-secondary');
+        newBtn.innerHTML = '<i class="fa-solid fa-ban me-2"></i> Hết hàng';
+        qtyInput.disabled = true;
+        qtyInput.value = 0;
+        return; // Dừng luôn, không gắn sự kiện click
+    } else {
+        // Mở lại nút (phòng khi người dùng chuyển từ sp hết hàng sang sp còn hàng mà không load lại trang)
+        newBtn.disabled = false;
+        newBtn.classList.remove('btn-secondary');
+        newBtn.classList.add('btn-primary');
+        newBtn.innerHTML = '<i class="fa-solid fa-cart-plus me-2"></i> Thêm vào giỏ hàng';
+        qtyInput.disabled = false;
+        if(qtyInput.value == 0) qtyInput.value = 1;
+    }
+
+    // 2. Sự kiện Click mua hàng (Chỉ chạy khi còn hàng)
     newBtn.addEventListener('click', async function() {
         const token = localStorage.getItem('access_token');
-        const quantity = parseInt(qtyInput.value) || 1; // Lấy số lượng thực tế từ trang
+        const quantity = parseInt(qtyInput.value) || 1; 
         
-        // 1. Kiểm tra đăng nhập
         if (!token) {
             if (typeof showNotification === 'function') {
                 showNotification('⚠️ Vui lòng đăng nhập để mua hàng!', 'warning');
@@ -310,7 +354,6 @@ function setupDetailAddToCart(product) {
             return;
         }
 
-        // 2. Trạng thái Loading
         this.disabled = true;
         const originalContent = this.innerHTML;
         this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
@@ -325,7 +368,7 @@ function setupDetailAddToCart(product) {
                 },
                 body: JSON.stringify({
                     maSanPham: product.maSanPham,
-                    soLuong: quantity // Gửi số lượng người dùng đã chọn
+                    soLuong: quantity 
                 })
             });
 
@@ -335,7 +378,6 @@ function setupDetailAddToCart(product) {
                 if (typeof showNotification === 'function') {
                     showNotification(`✓ Đã thêm ${quantity} "${product.tenSanPham}" vào giỏ hàng!`, 'success');
                 }
-                // Cập nhật Badge trên Header
                 if (typeof updateCartCount === 'function') updateCartCount();
             } else {
                 alert(result.message || 'Lỗi thêm vào giỏ hàng');
