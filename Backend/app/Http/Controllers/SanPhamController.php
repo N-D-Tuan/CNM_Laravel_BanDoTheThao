@@ -121,22 +121,22 @@ class SanPhamController extends Controller
             'moTa'
         ]));
 
-        // $data = $request->only([
-        //     'tenSanPham',
-        //     'giaNhap',
-        //     'giaBan',
-        //     'soLuongTon',
-        //     'maDanhMuc',
-        //     'moTa'
-        // ]);
+         $data = $request->only([
+             'tenSanPham',
+             'giaNhap',
+             'giaBan',
+             'soLuongTon',
+             'maDanhMuc',
+             'moTa'
+        ]);
 
-        // // 👉 Xử lý upload ảnh
-        // if ($request->hasFile('hinhAnh')) {
-        //     $path = $request->file('hinhAnh')->store('sanpham', 'public');
-        //     $data['hinhAnh'] = $path;
-        // }
 
-        // $sp = Sanpham::create($data);
+        if ($request->hasFile('hinhAnh')) {
+            $path = $request->file('hinhAnh')->store('sanpham', 'public');
+            $data['hinhAnh'] = $path;
+        }
+
+        $sp = Sanpham::create($data);
 
         return response()->json($sp, 201);
     }
@@ -166,21 +166,21 @@ class SanPhamController extends Controller
             'moTa'
         ]));
 
-        // $data = $request->only([
-        //     'tenSanPham',
-        //     'giaNhap',
-        //     'giaBan',
-        //     'soLuongTon',
-        //     'maDanhMuc',
-        //     'moTa'
-        // ]);
+         $data = $request->only([
+            'tenSanPham',
+            'giaNhap',
+            'giaBan',
+            'soLuongTon',
+            'maDanhMuc',
+           'moTa'
+        ]);
 
-        // if ($request->hasFile('hinhAnh')) {
-        //     $path = $request->file('hinhAnh')->store('sanpham', 'public');
-        //     $data['hinhAnh'] = $path;
-        // }
+        if ($request->hasFile('hinhAnh')) {
+            $path = $request->file('hinhAnh')->store('sanpham', 'public');
+            $data['hinhAnh'] = $path;
+        }
 
-        // $sp->update($data);
+        $sp->update($data);
         return response()->json($sp);
     }
 
