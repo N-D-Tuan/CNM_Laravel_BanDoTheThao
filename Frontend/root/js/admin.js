@@ -171,6 +171,450 @@ window.showAdminContent = function(type) {
         currentEvent.currentTarget.classList.add('active');
     }
 
+//==========================================================
+// danh muc
+
+window.fetchCategories = async function() {
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/danh-muc`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const categories = await response.json();
+        renderCategoryTable(categories);
+    } catch (e) {
+        console.error("Lỗi nạp danh mục:", e);
+    }
+};
+
+function renderCategoryTable(categories) {
+    const tbody = document.getElementById('category-table-body');
+    if (!categories || categories.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Chưa có danh mục nào.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = categories.map(cat => `
+        <tr>
+            <td>#${cat.maDanhMuc}</td>
+            <td class="fw-bold text-primary">${cat.tenDanhMuc}</td>
+            <td class="text-center"><span class="badge bg-secondary">Unknown</span></td> <td class="text-center">
+                <button class="btn btn-sm btn-warning me-1" onclick="promptEditCategory(${cat.maDanhMuc}, '${cat.tenDanhMuc}')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteCategory(${cat.maDanhMuc})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Xóa danh mục
+window.deleteCategory = async function(id) {
+    if (!confirm("Bạn có chắc chắn muốn xóa danh mục này? (Lưu ý: Không thể xóa nếu còn sản phẩm)")) return;
+
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/danh-muc/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const res = await response.json();
+        
+        if (response.ok) {
+            alert("Xóa thành công!");
+            fetchCategories();
+        } else {
+            alert(res.message || "Không thể xóa danh mục này.");
+        }
+    } catch (e) { alert("Lỗi kết nối server"); }
+};
+
+// Thêm 
+window.promptAddCategory = async function() {
+    const name = prompt("Nhập tên danh mục mới:");
+    if (!name) return;
+
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/danh-muc`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tenDanhMuc: name })
+        });
+
+        if (response.ok) {
+            alert("Thêm danh mục thành công!");
+            fetchCategories();
+        }
+    } catch (e) { alert("Lỗi khi thêm danh mục"); }
+};
+
+// Sửa 
+window.promptEditCategory = async function(id, oldName) {
+    const name = prompt("Nhập tên mới cho danh mục:", oldName);
+    if (!name || name === oldName) return;
+
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/danh-muc/${id}`, {
+            method: 'PUT',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tenDanhMuc: name })
+        });
+
+        if (response.ok) {
+            alert("Cập nhật thành công!");
+            fetchCategories();
+        }
+    } catch (e) { alert("Lỗi khi sửa danh mục"); }
+};
+
+//===========================================================
+// san pham
+
+window.fetchProducts = async function() {
+    const token = localStorage.getItem('access_token');
+    
+    const keyword = document.getElementById('search-keyword')?.value || '';
+    const cateId = document.getElementById('filter-category')?.value || '';
+
+    try {
+        let url = `${API_URL}/san-pham/filter?page=1`; 
+        
+        if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+        if (cateId) url += `&categoryId=${cateId}`;
+
+        const response = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const result = await response.json();
+
+        const products = result.data ? result.data : result;
+
+        renderProductTable(products);
+
+    } catch (e) {
+        console.error("Lỗi nạp sản phẩm:", e);
+        document.getElementById('product-table-body').innerHTML = `<tr><td colspan="7" class="text-center text-danger">Lỗi kết nối server</td></tr>`;
+    }
+}
+
+function renderProductTable(products) {
+    const tbody = document.getElementById('product-table-body');
+    if (!products || products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Chưa có sản phẩm nào.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = products.map(sp => {
+        const imageUrl = sp.hinhAnh ? `http://127.0.0.1:8000/storage/${sp.hinhAnh}` : 'https://via.placeholder.com/50';
+        const price = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(sp.giaBan);
+        const categoryName = sp.danhmucsanpham ? sp.danhmucsanpham.tenDanhMuc : 'Chưa phân loại';
+        
+        const spString = JSON.stringify(sp).replace(/"/g, '&quot;');
+
+        return `
+        <tr>
+            <td>${sp.maSanPham}</td>
+            <td><img src="${imageUrl}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
+            <td class="fw-bold">${sp.tenSanPham}</td>
+            <td><span class="badge bg-info text-dark">${categoryName}</span></td>
+            <td class="text-danger fw-bold">${price}</td>
+            <td>${sp.soLuongTon}</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-info text-white me-1" onclick="openFeatureModal(${sp.maSanPham}, '${sp.tenSanPham}')" title="Quản lý tính năng">
+                    <i class="bi bi-list-stars"></i>
+                </button>
+                
+                <button class="btn btn-sm btn-warning me-1" onclick="openEditProductModal(${spString})">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                
+                <button class="btn btn-sm btn-danger" onclick="deleteProduct(${sp.maSanPham})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+        `;
+    }).join('');
+}
+
+// thêm
+window.openAddProductModal = async function() {
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/danh-muc`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const categories = await response.json();
+
+        const selectBox = document.getElementById('add-prod-cate');
+        selectBox.innerHTML = '<option value="">-- Chọn danh mục --</option>' + 
+            categories.map(c => `<option value="${c.maDanhMuc}">${c.tenDanhMuc}</option>`).join('');
+
+        document.getElementById('addProductForm').reset();
+        
+        new bootstrap.Modal(document.getElementById('addProductModal')).show();
+    } catch (e) { alert("Lỗi tải danh mục"); }
+};
+
+// xóa sản phẩm
+window.deleteProduct = async function(id) {
+    if (!confirm("Bạn có chắc chắn muốn xóa vĩnh viễn sản phẩm này?")) return;
+
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/san-pham/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            alert("Đã xóa sản phẩm!");
+            fetchProducts();
+        } else {
+            alert("Lỗi khi xóa sản phẩm");
+        }
+    } catch (e) { alert("Lỗi kết nối server"); }
+};
+
+window.saveNewProduct = async function() {
+    const formData = new FormData();
+    formData.append('tenSanPham', document.getElementById('add-prod-name').value);
+    formData.append('maDanhMuc', document.getElementById('add-prod-cate').value);
+    formData.append('giaNhap', document.getElementById('add-prod-cost').value);
+    formData.append('giaBan', document.getElementById('add-prod-price').value);
+    formData.append('soLuongTon', document.getElementById('add-prod-stock').value);
+    formData.append('moTa', document.getElementById('add-prod-desc').value);
+    
+    const fileInput = document.getElementById('add-prod-img');
+    if (fileInput.files[0]) formData.append('hinhAnh', fileInput.files[0]);
+
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/san-pham`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }, 
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("Thêm thành công!");
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            fetchProducts();
+        } else {
+            const res = await response.json();
+            alert("Lỗi: " + (res.message || "Kiểm tra dữ liệu nhập"));
+        }
+    } catch (e) { alert("Lỗi server"); }
+};
+
+window.openEditProductModal = async function(product) {
+    const token = localStorage.getItem('access_token');
+    
+    try {
+        const resCat = await fetch(`${API_URL}/danh-muc`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const categories = await resCat.json();
+
+        const selectBox = document.getElementById('edit-prod-cate');
+        selectBox.innerHTML = categories.map(c => 
+            `<option value="${c.maDanhMuc}" ${c.maDanhMuc == product.maDanhMuc ? 'selected' : ''}>${c.tenDanhMuc}</option>`
+        ).join('');
+
+        document.getElementById('edit-prod-id').value = product.maSanPham;
+        document.getElementById('edit-prod-name').value = product.tenSanPham;
+        document.getElementById('edit-prod-cost').value = product.giaNhap;
+        document.getElementById('edit-prod-price').value = product.giaBan;
+        document.getElementById('edit-prod-stock').value = product.soLuongTon;
+        document.getElementById('edit-prod-desc').value = product.moTa || '';
+        document.getElementById('edit-prod-img').value = ''; 
+
+        const previewDiv = document.getElementById('current-img-preview');
+        if (product.hinhAnh) {
+            previewDiv.innerHTML = `<small>Ảnh hiện tại:</small><br><img src="http://127.0.0.1:8000/storage/${product.hinhAnh}" style="height:60px">`;
+        } else {
+            previewDiv.innerHTML = '';
+        }
+
+        new bootstrap.Modal(document.getElementById('editProductModal')).show();
+
+    } catch (e) { console.error(e); alert("Lỗi khi mở form sửa"); }
+};
+
+window.saveUpdateProduct = async function() {
+    const id = document.getElementById('edit-prod-id').value;
+    const token = localStorage.getItem('access_token');
+
+    const formData = new FormData();
+    formData.append('tenSanPham', document.getElementById('edit-prod-name').value);
+    formData.append('maDanhMuc', document.getElementById('edit-prod-cate').value);
+    formData.append('giaNhap', document.getElementById('edit-prod-cost').value);
+    formData.append('giaBan', document.getElementById('edit-prod-price').value);
+    formData.append('soLuongTon', document.getElementById('edit-prod-stock').value);
+    formData.append('moTa', document.getElementById('edit-prod-desc').value);
+
+    const fileInput = document.getElementById('edit-prod-img');
+    if (fileInput.files[0]) {
+        formData.append('hinhAnh', fileInput.files[0]);
+    }
+
+    formData.append('_method', 'PUT');
+
+    try {
+        const response = await fetch(`${API_URL}/san-pham/${id}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("Cập nhật thành công!");
+            bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
+            fetchProducts();
+        } else {
+            const res = await response.json();
+            alert("Lỗi: " + (res.message || "Không thể cập nhật"));
+        }
+    } catch (e) { alert("Lỗi kết nối"); }
+};
+
+// lọc
+
+window.loadCategoriesForFilter = async function() {
+    const token = localStorage.getItem('access_token');
+    try {
+        const response = await fetch(`${API_URL}/danh-muc`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const categories = await response.json();
+        
+        const selectBox = document.getElementById('filter-category');
+        if (selectBox) {
+            // Giữ nguyên option đầu tiên (Tất cả), nối thêm danh mục mới
+            selectBox.innerHTML = '<option value="">-- Tất cả danh mục --</option>' + 
+                categories.map(c => `<option value="${c.maDanhMuc}">${c.tenDanhMuc}</option>`).join('');
+        }
+    } catch (e) { console.error("Lỗi tải danh mục lọc", e); }
+};
+
+//tinh nang
+
+window.openFeatureModal = function(productId, productName) {
+    // Lưu ID sản phẩm vào biến ẩn để lát nữa thêm tính năng biết thêm cho ai
+    document.getElementById('feat-prod-id').value = productId;
+    document.getElementById('feat-prod-name').innerText = "Sản phẩm: " + productName;
+    document.getElementById('feat-new-name').value = ''; // Xóa trắng ô nhập
+
+    // Hiển thị Modal
+    new bootstrap.Modal(document.getElementById('featureModal')).show();
+
+    // Gọi hàm tải dữ liệu ngay lập tức
+    loadFeatures(productId);
+};
+
+// 2. Hàm tải danh sách từ Server
+window.loadFeatures = async function(productId) {
+    const token = localStorage.getItem('access_token');
+    const tbody = document.getElementById('feature-list-body');
+    
+    // Hiện chữ "Đang tải..." cho chuyên nghiệp
+    tbody.innerHTML = '<tr><td colspan="2" class="text-center">Đang tải...</td></tr>';
+
+    try {
+        const response = await fetch(`${API_URL}/tinh-nang/${productId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const res = await response.json();
+        
+        // API của bạn trả về: { message: "...", data: [...] }
+        const features = res.data; 
+
+        if (!features || features.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">Chưa có tính năng nào.</td></tr>';
+            return;
+        }
+
+        // Vẽ danh sách ra bảng
+        tbody.innerHTML = features.map(f => `
+            <tr>
+                <td>${f.tenTinhNang}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteFeature(${f.maTinhNang})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+    } catch (e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="2" class="text-center text-danger">Lỗi kết nối!</td></tr>';
+    }
+};
+
+// 3. Hàm Thêm Tính năng Mới
+window.addFeature = async function() {
+    const productId = document.getElementById('feat-prod-id').value;
+    const featName = document.getElementById('feat-new-name').value;
+    const token = localStorage.getItem('access_token');
+
+    if (!featName.trim()) {
+        alert("Vui lòng nhập tên tính năng!");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/tinh-nang`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                maSanPham: productId,
+                tenTinhNang: featName
+            })
+        });
+
+        if (response.ok) {
+            // Thêm xong thì tải lại danh sách luôn để thấy kết quả
+            loadFeatures(productId);
+            document.getElementById('feat-new-name').value = ''; // Xóa ô nhập để nhập tiếp
+            document.getElementById('feat-new-name').focus();
+        } else {
+            alert("Lỗi khi thêm tính năng!");
+        }
+    } catch (e) { alert("Lỗi kết nối server!"); }
+};
+
+// 4. Hàm Xóa Tính năng
+window.deleteFeature = async function(featureId) {
+    if (!confirm("Bạn chắc chắn muốn xóa tính năng này?")) return;
+
+    const token = localStorage.getItem('access_token');
+    const productId = document.getElementById('feat-prod-id').value; // Lấy ID để reload lại list
+
+    try {
+        const response = await fetch(`${API_URL}/tinh-nang/${featureId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            loadFeatures(productId); // Xóa xong tải lại danh sách
+        } else {
+            alert("Không thể xóa (Có thể do lỗi server).");
+        }
+    } catch (e) { alert("Lỗi kết nối!"); }
+};
+
     switch(type) {
         case 'users':
             subContent.innerHTML = `
@@ -210,23 +654,79 @@ window.showAdminContent = function(type) {
         case 'categories':
             subContent.innerHTML = `
                 <div class="card shadow-sm border-0 p-4">
-                    <h3 class="fw-bold mb-3">QUẢN LÝ DANH MỤC</h3>
-                    <div class="alert alert-secondary">Tính năng danh mục đang được cập nhật.</div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="fw-bold mb-0 text-primary">QUẢN LÝ DANH MỤC</h3>
+                        <button class="btn btn-primary btn-sm" onclick="promptAddCategory()">
+                            <i class="bi bi-plus-lg"></i> Thêm danh mục
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã DM</th>
+                                    <th>Tên Danh Mục</th>
+                                    <th class="text-center">Số lượng SP</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="category-table-body">
+                                <tr><td colspan="4" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>`;
+            fetchCategories(); // Gọi hàm load danh mục
             break;
 
         case 'products':
             subContent.innerHTML = `
                 <div class="card shadow-sm border-0 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="fw-bold mb-0">QUẢN LÝ SẢN PHẨM</h3>
-                        <button class="btn btn-success btn-sm"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</button>
+                        <h3 class="fw-bold mb-0 text-primary">QUẢN LÝ SẢN PHẨM</h3>
+                        <button class="btn btn-success btn-sm" onclick="openAddProductModal()">
+                            <i class="bi bi-plus-lg"></i> Thêm sản phẩm
+                        </button>
                     </div>
-                    <div class="bg-light p-5 text-center border rounded">
-                        <i class="bi bi-box-seam display-4 text-secondary"></i>
-                        <p class="mt-2 text-secondary">Chưa có sản phẩm nào được hiển thị.</p>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-5">
+                            <input type="text" id="search-keyword" class="form-control" placeholder="Nhập tên sản phẩm..." onkeypress="if(event.key==='Enter') fetchProducts()">
+                        </div>
+                        <div class="col-md-4">
+                            <select id="filter-category" class="form-select" onchange="fetchProducts()">
+                                <option value="">-- Tất cả danh mục --</option>
+                                </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="fetchProducts()">
+                                <i class="bi bi-search"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Danh mục</th>
+                                    <th>Giá bán</th>
+                                    <th>Tồn kho</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product-table-body">
+                                <tr><td colspan="7" class="text-center py-4">Đang tải dữ liệu...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>`;
+            
+            loadCategoriesForFilter();
+            fetchProducts(); 
             break;
 
         case 'orders':

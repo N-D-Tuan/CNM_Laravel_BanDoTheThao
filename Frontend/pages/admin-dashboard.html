@@ -109,6 +109,150 @@
     </div>
 </div>
 
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Thêm Sản Phẩm Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="add-prod-name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Danh mục <span class="text-danger">*</span></label>
+                            <select class="form-select" id="add-prod-cate"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Giá Nhập</label>
+                            <input type="number" class="form-control" id="add-prod-cost" value="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Giá Bán <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="add-prod-price">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Tồn kho</label>
+                            <input type="number" class="form-control" id="add-prod-stock" value="10">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hình ảnh</label>
+                        <input type="file" class="form-control" id="add-prod-img" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả</label>
+                        <textarea class="form-control" id="add-prod-desc" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success" onclick="saveNewProduct()">Lưu sản phẩm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">Cập nhật Sản Phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <input type="hidden" id="edit-prod-id"> <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tên sản phẩm</label>
+                            <input type="text" class="form-control" id="edit-prod-name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Danh mục</label>
+                            <select class="form-select" id="edit-prod-cate"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Giá Nhập</label>
+                            <input type="number" class="form-control" id="edit-prod-cost">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Giá Bán</label>
+                            <input type="number" class="form-control" id="edit-prod-price">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Tồn kho</label>
+                            <input type="number" class="form-control" id="edit-prod-stock">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hình ảnh mới (Để trống nếu giữ ảnh cũ)</label>
+                        <input type="file" class="form-control" id="edit-prod-img" accept="image/*">
+                        <div class="mt-2 text-center border rounded p-2 bg-light" id="current-img-preview">
+                            </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả</label>
+                        <textarea class="form-control" id="edit-prod-desc" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning" onclick="saveUpdateProduct()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="featureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Quản lý tính năng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="feat-prod-id">
+                <p class="fw-bold text-primary" id="feat-prod-name">Sản phẩm: ...</p>
+
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="feat-new-name" placeholder="Nhập tính năng (VD: Chống nước, Pin trâu...)">
+                    <button class="btn btn-dark" type="button" onclick="addFeature()">
+                        <i class="bi bi-plus-lg"></i> Thêm
+                    </button>
+                </div>
+
+                <hr>
+
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên tính năng</th>
+                                <th class="text-center" style="width: 50px;">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feature-list-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     loadAdminStats();
 </script>
