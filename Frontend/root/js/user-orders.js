@@ -66,6 +66,11 @@ function renderUserOrderCard(order) {
   const firstItem = order.items[0]
   const otherCount = order.items.length - 1
 
+  const imgSrc = firstItem.img 
+            ? (firstItem.img.startsWith('http') ? firstItem.img : `http://127.0.0.1:8000/storage/${firstItem.img}`) 
+            : 'https://via.placeholder.com/300';
+
+
   let actionButton = "";
   if (order.status === "Chờ duyệt") {
     actionButton = `
@@ -96,7 +101,7 @@ function renderUserOrderCard(order) {
             </div>
             <div class="card-body">
                 <div class="d-flex gap-3">
-                    <img src="${firstItem.img}" class="rounded shadow-sm" style="width: 75px; height: 75px; object-fit: cover;">
+                    <img src="${imgSrc}" class="rounded shadow-sm" style="width: 75px; height: 75px; object-fit: cover;">
                     <div class="flex-grow-1">
                         <div class="fw-bold mb-1">${firstItem.name}</div>
                         <div class="text-muted small">Số lượng: ${firstItem.qty}</div>
