@@ -426,13 +426,19 @@ window.submitProductReviews = async () => {
     }
 
     if (successCount > 0) {
-        alert(`Thành công! Đã gửi ${successCount} đánh giá.`);
+        alert(`Đã gửi thành công ${successCount} đánh giá!`);
+        
         const modal = window.bootstrap.Modal.getInstance(document.getElementById("ratingModal"));
         if(modal) modal.hide();
+        
+        // --- SỬA Ở ĐÂY: Tải lại trang để cập nhật trạng thái nút "Mua lại" ---
+        location.reload(); 
     } 
     
     if (failMessages.length > 0) {
-        alert("Có lỗi xảy ra:\n" + failMessages.join("\n"));
+        alert("Một số đánh giá thất bại: \n" + failMessages.join("\n"));
+        // Nếu muốn tải lại trang ngay cả khi có lỗi một vài món, bạn có thể bỏ comment dòng dưới:
+        // location.reload();
     }
 }
 
@@ -476,7 +482,7 @@ window.handleBuyAgain = async (orderId) => {
           if (data.warnings && data.warnings.length > 0) {
               alert("Lưu ý:\n" + data.warnings.join("\n"));
           }
-          //window.location.href = "cart.html"; // Chuyển trang
+          window.location.href = "order-user.html"; // Chuyển trang
       } else {
           alert("Lỗi: " + data.message);
       }
