@@ -16,7 +16,6 @@ function checkAuth() {
     const token = localStorage.getItem('access_token');
 
     if (!token) {
-        console.error('Không có token!');
         // Chuyển về trang đăng nhập
         if (typeof showPage === 'function') {
             showPage('login');
@@ -147,6 +146,30 @@ function renderCart() {
     });
 
     updateSummary();
+
+    const userLocal = localStorage.getItem('user');
+    const user = userLocal ? JSON.parse(userLocal) : null;
+    const isAdmin = user && user.role === 'Admin'; // Giả sử trường phân quyền là 'role'
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        if (isAdmin) {
+            // Nếu là Admin: Vô hiệu hóa nút và đổi giao diện để người dùng biết
+            checkoutBtn.disabled = true;
+            checkoutBtn.style.cursor = 'not-allowed';
+            checkoutBtn.style.opacity = '0.6';
+            checkoutBtn.innerHTML = `<i class="bi bi-slash-circle"></i> Admin không thể thanh toán`;
+            checkoutBtn.classList.remove('btn-success');
+            checkoutBtn.classList.add('btn-secondary');
+        } else {
+            // Nếu là User bình thường: Giữ nguyên
+            checkoutBtn.disabled = false;
+            checkoutBtn.style.cursor = 'pointer';
+            checkoutBtn.style.opacity = '1';
+            checkoutBtn.innerHTML = `<i class="bi bi-credit-card"></i> Thanh Toán`;
+        }
+    }
+
     document.getElementById('cartContent').style.display = 'block';
     document.getElementById('emptyCart').style.display = 'none';
 }
@@ -219,9 +242,8 @@ async function removeFromCart(id) {
 }
 
 /* ================== CLEAR CART ================== */
-window.clearCart = async function() {
-    if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?')) return;
-
+// Hàm xóa giỏ hàng thực thi (Không hỏi confirm)
+window.executeClearCart = async function() {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
@@ -235,21 +257,28 @@ window.clearCart = async function() {
             }
         });
 
-        const result = await res.json();
-
         if (res.ok) {
-            showNotification('✓ Đã xóa toàn bộ giỏ hàng!', 'success');
             // Cập nhật lại giao diện ngay lập tức
             cartData = { items: [], tongTien: 0, soLuongSanPham: 0 };
-            showEmptyCart();
-            // Cập nhật badge giỏ hàng trên Header nếu có
-            if (typeof updateCartBadge === 'function') updateCartBadge();
-        } else {
-            showNotification(result.message || 'Lỗi xóa!', 'error');
+            const emptyEl = document.getElementById('emptyCart');
+            const contentEl = document.getElementById('cartContent');
+            
+            if (emptyEl && contentEl) {
+                contentEl.style.display = 'none';
+                emptyEl.style.display = 'block';
+            }
+            
+            if (typeof updateCartCount === 'function') updateCartCount();
         }
     } catch (error) {
-        console.error('Error:', error);
-        showNotification('❌ Không thể kết nối đến server!', 'error');
+        console.error('Lỗi tự động xóa giỏ hàng:', error);
+    }
+}
+
+// Giữ nguyên hàm cũ cho nút bấm "Xóa toàn bộ" trên giao diện
+window.clearCart = async function() {
+    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?')) {
+        await window.executeClearCart();
     }
 }
 
@@ -323,3 +352,60 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
+
+// Cập nhật hàm checkout trong cart.js
+window.checkout = async function() {
+    if (!cartData.items || cartData.items.length === 0) {
+        showNotification('⚠️ Giỏ hàng trống!', 'warning');
+        return;
+    }
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        showNotification('⚠️ Vui lòng đăng nhập để thanh toán!', 'warning');
+        showPage('login');
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/api/vnpay/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}` // THÊM DÒNG NÀY
+            },
+            body: JSON.stringify({
+                amount: cartData.tongTien,
+                order_id: "LPT" + Date.now()
+            })
+        });
+
+        // Kiểm tra nếu response không thành công (ví dụ lỗi 500)
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Lỗi server");
+        }
+
+        const result = await response.json();
+        if (result.status === 'success' && result.payment_url) {
+            window.location.href = result.payment_url;
+        }
+    } catch (error) {
+        console.error("VNPay Error:", error);
+        alert("Lỗi khi tạo liên kết thanh toán: " + error.message);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.get('payment') === 'success') {
+        alert("Thanh toán thành công! Đơn hàng của bạn đang được xử lý.");
+
+        if (typeof clearCart === 'function')
+            clearCart();
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});

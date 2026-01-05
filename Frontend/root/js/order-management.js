@@ -4,13 +4,27 @@ let mockOrders = [];
 let currentOrder = null;
 
 window.loadData = () => {
+  const token = localStorage.getItem('access_token');
+
+  if (!token) {
+      console.warn("Chưa đăng nhập hoặc thiếu token");
+      return;
+  }
+
   fetch(`http://127.0.0.1:8000/api/donhang`, {
       headers: {
           "Accept": "application/json", 
-          "Authorization": `Bearer ${localStorage.getItem('access_token')}`
+          "Authorization": `Bearer ${token}`
       }
   })
   .then(res => {
+      if (res.status === 401) {
+          alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.");
+          localStorage.clear();
+          showPage('login'); 
+          throw new Error("Unauthorized");
+      }
+
       if (!res.ok) throw new Error("Server error");
       return res.json();
   })
@@ -23,8 +37,6 @@ window.loadData = () => {
       if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Lỗi máy chủ (500)</td></tr>`;
   });
 }
-
-loadData();
 
 // Hàm render giao diện chính của Quản lý đơn hàng
 window.renderOrderManagement = () => {
@@ -89,6 +101,7 @@ window.renderOrderManagement = () => {
     `
 
   renderTable(mockOrders)
+  loadData();
 }
 
 // Hàm render bảng dữ liệu

@@ -10,7 +10,7 @@ use App\Http\Controllers\DanhMucController;
 use App\Http\Controllers\TinhNangController;
 use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\DanhMucSanPhamController;
-
+use App\Http\Controllers\VNPayController;
 
 Route::get('/tinh-nang/xem/{id}', [TinhNangController::class, 'xemTinhNang']);
 
@@ -52,8 +52,12 @@ Route::put('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'suaTinhNang']
 Route::delete('/tinh-nang/{maTinhNang}', [TinhNangController::class, 'xoaTinhNang']);
 Route::get('/tinh-nang', [TinhNangController::class, 'xemTatCaTinhNang']);
 
+Route::get('/vnpay-return', [VNPayController::class, 'vnpayReturn']);
 // ==================== ROUTES GIỎ HÀNG (CẦN ĐĂNG NHẬP) ====================
 Route::middleware('auth:sanctum')->group(function () {
+    //Thanh toán VNPay
+    Route::post('/vnpay/create', [VNPayController::class, 'createPayment']);
+
     // Giỏ hàng
     Route::get('/giohang/count', [GioHangController::class, 'count']);
     Route::get('/giohang', [GioHangController::class, 'index']);           

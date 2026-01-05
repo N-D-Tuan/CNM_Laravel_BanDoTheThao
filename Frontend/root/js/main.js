@@ -157,4 +157,19 @@ async function showProductDetail(id) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.get('payment') === 'success') {
+        const paymentModal = new bootstrap.Modal(document.getElementById('paymentSuccessModal'));
+        paymentModal.show();
+
+        if (typeof window.executeClearCart === 'function') {
+            window.executeClearCart();
+        }
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+
 window.onload = init;

@@ -2,17 +2,30 @@ window.userOrders = []
 
 window.loadUserOrders = async () => {
   const userLocal = localStorage.getItem("user")
+  const token = localStorage.getItem("access_token")
+
   if (!userLocal) return
 
   const user = JSON.parse(userLocal)
   const userId = user.maNguoiDung
-  console.log(userId);
 
-  const res = await fetch(`http://127.0.0.1:8000/api/donhang/user/${userId}`)
-  const json = await res.json()
-
-  if (json.status) {
-    window.userOrders = json.data
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/api/donhang/user/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // Gửi kèm token để xác thực
+        'Accept': 'application/json'
+      }
+    })
+    
+    if (!res.ok) throw new Error("Lỗi server")
+    
+    const json = await res.json()
+    if (json.status) {
+      window.userOrders = json.data
+      window.renderUserOrders("Tất cả") 
+    }
+  } catch (err) {
+    console.error("Lỗi load đơn hàng:", err)
   }
 }
 
