@@ -92,11 +92,16 @@ function renderCart() {
     container.innerHTML = '';
 
     cartData.items.forEach(item => {
+        const imgSrc = item.hinhAnh 
+            ? (item.hinhAnh.startsWith('http') ? item.hinhAnh : `http://127.0.0.1:8000/storage/${item.hinhAnh}`) 
+            : 'https://via.placeholder.com/300';
+
         container.innerHTML += `
+        
             <div class="cart-item border-bottom p-3 mb-3">
                 <div class="row align-items-center">
                     <div class="col-md-2 col-3">
-                        <img src="${item.hinhAnh || '/images/no-image.png'}" 
+                        <img src="${imgSrc}" 
                              class="img-fluid rounded cart-item-img" 
                              alt="${item.tenSanPham}">
                     </div>

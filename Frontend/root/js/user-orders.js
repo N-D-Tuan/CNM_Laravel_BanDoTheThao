@@ -66,6 +66,11 @@ function renderUserOrderCard(order) {
   const firstItem = order.items[0]
   const otherCount = order.items.length - 1
 
+  const imgSrc = firstItem.img 
+            ? (firstItem.img.startsWith('http') ? firstItem.img : `http://127.0.0.1:8000/storage/${firstItem.img}`) 
+            : 'https://via.placeholder.com/300';
+
+
   let actionButton = "";
   if (order.status === "Chờ duyệt") {
     actionButton = `
@@ -96,7 +101,7 @@ function renderUserOrderCard(order) {
             </div>
             <div class="card-body">
                 <div class="d-flex gap-3">
-                    <img src="${firstItem.img}" class="rounded shadow-sm" style="width: 75px; height: 75px; object-fit: cover;">
+                    <img src="${imgSrc}" class="rounded shadow-sm" style="width: 75px; height: 75px; object-fit: cover;">
                     <div class="flex-grow-1">
                         <div class="fw-bold mb-1">${firstItem.name}</div>
                         <div class="text-muted small">Số lượng: ${firstItem.qty}</div>
@@ -143,40 +148,44 @@ window.showUserOrderDetail = (id) => {
   const modalFooter = document.getElementById("userOrderDetailFooter")
 
   modalBody.innerHTML = `
-        <div class="order-detail-header p-3 border-bottom mb-3">
-            <div class="row">
-                <div class="col-6">
-                    <div class="text-muted small">Mã đơn hàng</div>
-                    <div class="fw-bold">${order.id}</div>
-                </div>
-                <div class="col-6 text-end">
-                    <div class="text-muted small">Ngày đặt</div>
-                    <div>${order.date}</div>
-                </div>
+    <div class="order-detail-header p-3 border-bottom mb-3">
+        <div class="row">
+            <div class="col-6">
+                <div class="text-muted small">Mã đơn hàng</div>
+                <div class="fw-bold">${order.id}</div>
+            </div>
+            <div class="col-6 text-end">
+                <div class="text-muted small">Ngày đặt</div>
+                <div>${order.date}</div>
             </div>
         </div>
-        <div class="px-3 pb-3">
-            <div class="fw-bold mb-3 text-uppercase small text-muted">Sản phẩm</div>
-            ${order.items
-      .map(
-        (item) => `
-                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom-light">
-                    <img src="${item.img}" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;">
-                    <div class="flex-grow-1">
-                        <div class="fw-bold small">${item.name}</div>
-                        <div class="text-muted extra-small">${item.price.toLocaleString()}đ x ${item.qty}</div>
+    </div>
+    <div class="px-3 pb-3">
+        <div class="fw-bold mb-3 text-uppercase small text-muted">Sản phẩm</div>
+        ${order.items
+            .map((item) => {
+                const imgSrc = item.img 
+                    ? (item.img.startsWith('http') ? item.img : `http://127.0.0.1:8000/storage/${item.img}`) 
+                    : 'https://via.placeholder.com/300';
+
+                return `
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom-light">
+                        <img src="${imgSrc}" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold small">${item.name}</div>
+                            <div class="text-muted extra-small">${item.price.toLocaleString()}đ x ${item.qty}</div>
+                        </div>
+                        <div class="fw-bold text-dark">${(item.qty * item.price).toLocaleString()}đ</div>
                     </div>
-                    <div class="fw-bold text-dark">${(item.qty * item.price).toLocaleString()}đ</div>
-                </div>
-            `,
-      )
-      .join("")}
-            <div class="d-flex justify-content-between align-items-center mt-4">
-                <span class="h5 mb-0 fw-bold">Tổng thanh toán:</span>
-                <span class="h3 mb-0 fw-bold text-danger">${order.total.toLocaleString()}đ</span>
-            </div>
+                `;
+            })
+            .join("")}
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <span class="h5 mb-0 fw-bold">Tổng thanh toán:</span>
+            <span class="h3 mb-0 fw-bold text-danger">${order.total.toLocaleString()}đ</span>
         </div>
-    `
+    </div>
+`;
 
   let footerHtml = "";
   if (order.status === "Chờ duyệt") {
@@ -195,6 +204,8 @@ window.showUserOrderDetail = (id) => {
 }
 
 window.handleUserCancelOrder = async (id) => {
+  const token = localStorage.getItem("access_token")
+
   if (confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${id}?`)) {
     let trangThai = 'Đã hủy';
 
@@ -203,7 +214,8 @@ window.handleUserCancelOrder = async (id) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json"
+          "Accept": "application/json",
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           trangThai: trangThai
@@ -234,13 +246,16 @@ window.handleUserCancelOrder = async (id) => {
 }
 
 window.handleConfirmReceived = async (id) => {
+  const token = localStorage.getItem("access_token")
+
   if (confirm(`Bạn xác nhận đã nhận được đơn hàng số ${id}?`)) {
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/donhang/${id}/trangthai`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          "Accept": "application/json",
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           trangThai: "Đã giao"
