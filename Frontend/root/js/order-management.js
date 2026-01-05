@@ -31,6 +31,7 @@ window.loadData = () => {
   .then(result => {
       mockOrders = result.data;
       renderTable(mockOrders);
+      return result.data;
   }).catch(err => {
       console.error("Lỗi API: ", err);
       const tbody = document.getElementById("order-table-body");
@@ -207,17 +208,21 @@ window.showOrderDetail = (orderId) => {
                 </thead>
                 <tbody>
                     ${order.details
-                      .map(
-                        (item) => `
+                      .map((item) => {
+                        const imgSrc = item.img 
+                              ? (item.img.startsWith('http') ? item.img : `http://127.0.0.1:8000/storage/${item.img}`) 
+                              : 'https://via.placeholder.com/300';
+
+                        return `
                         <tr>
-                            <td><img src="${item.img}" class="order-detail-img" alt="${item.name}"></td>
+                            <td><img src="${imgSrc}" class="order-detail-img" alt="${item.name}"></td>
                             <td>${item.name}</td>
                             <td class="text-center">${item.quantity}</td>
                             <td class="text-end">${item.price.toLocaleString()}đ</td>
                             <td class="text-end">${(item.quantity * item.price).toLocaleString()}đ</td>
                         </tr>
-                    `,
-                      )
+                    `;
+                    })
                       .join("")}
                 </tbody>
             </table>
@@ -225,7 +230,7 @@ window.showOrderDetail = (orderId) => {
         <div class="order-summary text-end">
             <h5 class="mb-0 fw-bold">Tổng cộng: <span class="text-danger">${order.total.toLocaleString()}đ</span></h5>
         </div>
-    `
+    `;
 
   document.getElementById("modalOrderBody").innerHTML = detailsHtml
   document.getElementById("modalOrderFooter").innerHTML = `
@@ -239,51 +244,42 @@ window.showOrderDetail = (orderId) => {
 
 // Hàm xử lý các nút bấm
 window.handleAction = async (action, id, fromModal = false) => {
-  event.stopPropagation() 
-  let trangThai = '';
-  if(action === 'approve') {
-    trangThai = 'Đang giao';
-    if(!confirm(`Duyệt đơn hàng ${id}`)) return;
-  } else if(action === 'cancel') {
-    trangThai = 'Đã hủy';
-    if(!confirm(`Hủy đơn hàng ${id}`)) return;
-  }
+  if (window.event) window.event.stopPropagation(); // Đảm bảo chặn nổi bọt sự kiện
+
+  let trangThai = (action === 'approve') ? 'Đang giao' : 'Đã hủy';
+  if (!confirm(`${action === 'approve' ? 'Duyệt' : 'Hủy'} đơn hàng ${id}?`)) return;
+
+  const token = localStorage.getItem('access_token'); // Lấy token để gửi kèm
 
   try {
     const res = await fetch(`http://127.0.0.1:8000/api/donhang/${id}/trangthai`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json"
+        "Accept": "application/json",
+        "Authorization": `Bearer ${token}` // BẮT BUỘC: Thêm Token ở đây để tránh lỗi 401
       },
-      body: JSON.stringify({
-        trangThai: trangThai
-      })
+      body: JSON.stringify({ trangThai: trangThai })
     });
 
     const data = await res.json();
-    if(data.status) {
+    if (data.status) {
       alert(data.message);
 
-      loadData();
-      filterOrders();
+      // QUAN TRỌNG: Chờ load xong dữ liệu mới rồi mới lọc
+      await window.loadData(); 
+      window.filterOrders();
 
-      if(fromModal && currentOrder) {
+      if (fromModal) {
+        // Đóng modal chi tiết
         const modalEl = document.getElementById("orderDetailModal");
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
-
-        if (modalInstance) {
-          modalInstance.hide();
-        }
-
-        document.querySelectorAll(".modal-backdrop").forEach(el => el.remove());
-        document.body.classList.remove("modal-open");
-        document.body.style.removeProperty("padding-right");
-      } 
+        if (modalInstance) modalInstance.hide();
+      }
     }
   } catch (error) {
     console.error(error);
-    alert("Lỗi kết nối server");
+    alert("Lỗi kết nối hoặc quyền truy cập bị từ chối.");
   }
 }
 
