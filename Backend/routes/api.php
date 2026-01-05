@@ -12,6 +12,9 @@ use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\DanhMucSanPhamController;
 use App\Http\Controllers\VNPayController;
 
+Route::post('/danh-gia/them', [DanhGiaController::class, 'store']);
+// 👇 Đổi 'api' thành 'sanctum'
+Route::post('/gio-hang/them-nhieu', [GioHangController::class, 'addMultiple'])->middleware('auth:sanctum');
 Route::get('/tinh-nang/xem/{id}', [TinhNangController::class, 'xemTinhNang']);
 
 Route::post('/danh-gia', [DanhGiaController::class, 'store']);

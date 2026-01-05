@@ -6,6 +6,7 @@ use App\Models\Giohang;
 use App\Models\Sanpham;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class GioHangController extends Controller
 {
@@ -140,6 +141,75 @@ class GioHangController extends Controller
                 'success' => false,
                 'message' => 'Lỗi khi thêm vào giỏ hàng: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function addMultiple(Request $request)
+    {
+        // 1. Kiểm tra xem User có đăng nhập được không
+        $user = $request->user();
+        if (!$user) {
+            // Nếu lỗi này hiện ra -> Bạn chưa cấu hình Route middleware hoặc Token sai
+            return response()->json(['success' => false, 'message' => 'Lỗi: Không xác định được người dùng (User is null). Kiểm tra lại Route api.php'], 401);
+        }
+
+        // 2. Validate dữ liệu
+        $validator = Validator::make($request->all(), [
+            'items' => 'required|array',
+            // Lưu ý: Tên bảng trong DB của bạn là 'SanPham' hay 'sanpham'? 
+            // Mình để 'SanPham' theo SQL bạn gửi.
+            'items.*.maSanPham' => 'required|integer|exists:SanPham,maSanPham', 
+            'items.*.soLuong' => 'required|integer|min:1'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Dữ liệu không hợp lệ', 'errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction(); 
+        try {
+            $maNguoiDung = $user->maNguoiDung;
+            $addedCount = 0;
+            $errors = [];
+
+            foreach ($request->items as $item) {
+                $maSanPham = $item['maSanPham'];
+                $soLuongMuon = $item['soLuong'];
+
+                $sanPham = Sanpham::find($maSanPham);
+                if (!$sanPham) continue; 
+
+                // Kiểm tra giỏ hàng
+                $existing = Giohang::where('maNguoiDung', $maNguoiDung)->where('maSanPham', $maSanPham)->first();
+                $soLuongHienTai = $existing ? $existing->soLuong : 0;
+                $tongSoLuong = $soLuongHienTai + $soLuongMuon;
+
+                // Kiểm tra kho
+                if ($tongSoLuong > $sanPham->soLuongTon) {
+                    $errors[] = "{$sanPham->tenSanPham}: Kho không đủ (còn {$sanPham->soLuongTon})";
+                    continue; 
+                }
+
+                if ($existing) {
+                    Giohang::where('maNguoiDung', $maNguoiDung)->where('maSanPham', $maSanPham)->update(['soLuong' => $tongSoLuong]);
+                } else {
+                    Giohang::create(['maNguoiDung' => $maNguoiDung, 'maSanPham' => $maSanPham, 'soLuong' => $soLuongMuon]);
+                }
+                $addedCount++;
+            }
+
+            DB::commit();
+            
+            return response()->json([
+                'success' => true, 
+                'message' => "Đã thêm $addedCount sản phẩm vào giỏ.",
+                'warnings' => $errors
+            ], 200);
+
+        } catch (\Throwable $e) { 
+            DB::rollBack();
+            // Bắt lỗi hệ thống và in ra message thay vì lỗi 500
+            return response()->json(['success' => false, 'message' => 'Lỗi Server: ' . $e->getMessage()], 500);
         }
     }
 

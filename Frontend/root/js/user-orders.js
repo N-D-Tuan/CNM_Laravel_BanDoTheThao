@@ -73,10 +73,19 @@ function renderUserOrderCard(order) {
           Hủy đơn hàng
       </button>`;
   } else if (order.status === "Đã giao") {
-    actionButton = `
-      <button class="btn btn-outline-primary btn-sm px-4 rounded-pill" onclick="event.stopPropagation(); showEvaluationModal('${order.id}')">
-          Đánh giá sản phẩm
-      </button>`;
+    if (order.is_rated) {
+        // Nếu đã đánh giá => Hiện nút Mua lại
+        actionButton = `
+          <button class="btn btn-secondary btn-sm px-4 rounded-pill" onclick="event.stopPropagation(); handleBuyAgain('${order.id}')">
+              <i class="bi bi-cart-plus"></i> Mua lại
+          </button>`;
+    } else {
+        // Nếu chưa đánh giá => Hiện nút Đánh giá
+        actionButton = `
+          <button class="btn btn-outline-primary btn-sm px-4 rounded-pill" onclick="event.stopPropagation(); showEvaluationModal('${order.id}')">
+              Đánh giá sản phẩm
+          </button>`;
+    }
   }
 
   return `
@@ -255,7 +264,219 @@ window.handleConfirmReceived = async (id) => {
   }
 }
 
-window.showEvaluationModal = (id) => {
-    alert("Chức năng đánh giá cho đơn hàng " + id + " đang được phát triển.");
-    // Bạn có thể showPage('danh-gia') hoặc mở modal đánh giá tại đây
+// Biến toàn cục tạm để lưu ID đơn hàng đang đánh giá
+let currentRatingOrderId = null;
+
+// 1. Hiển thị Modal đánh giá
+window.showEvaluationModal = (orderId) => {
+    // Tìm đơn hàng trong danh sách đã tải
+    const order = window.userOrders.find((o) => String(o.id) === String(orderId));
+    if (!order) return;
+
+    currentRatingOrderId = orderId;
+    const modalBody = document.getElementById("ratingModalBody");
+    
+    // === SỬA: Log dữ liệu ra console để kiểm tra ===
+    console.log("Dữ liệu đơn hàng đang đánh giá:", order);
+    console.log("Danh sách sản phẩm (items):", order.items);
+
+    const html = order.items.map(item => {
+        // === SỬA: Thử lấy ID bằng nhiều cách và log nếu thiếu ===
+        // Bạn hãy mở Console (F12) xem nó in ra cái gì nếu bị undefined
+        const productId = item.maSanPham || item.product_id || item.id; 
+        
+        if (!productId) {
+            console.error("CẢNH BÁO: Không tìm thấy ID sản phẩm trong item này:", item);
+            console.warn("Vui lòng kiểm tra API DonHangController xem đã select cột 'maSanPham' chưa.");
+        }
+
+        return `
+            <div class="card mb-3 border-0 shadow-sm rating-item" data-product-id="${productId}">
+                <div class="card-body d-flex gap-3">
+                    <img src="${item.img}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold mb-1">${item.name}</h6>
+                        
+                        <div class="mb-2 star-rating-container">
+                            <i class="bi bi-star text-warning fs-4 cursor-pointer" onclick="selectStar(this, 1)"></i>
+                            <i class="bi bi-star text-warning fs-4 cursor-pointer" onclick="selectStar(this, 2)"></i>
+                            <i class="bi bi-star text-warning fs-4 cursor-pointer" onclick="selectStar(this, 3)"></i>
+                            <i class="bi bi-star text-warning fs-4 cursor-pointer" onclick="selectStar(this, 4)"></i>
+                            <i class="bi bi-star text-warning fs-4 cursor-pointer" onclick="selectStar(this, 5)"></i>
+                            <input type="hidden" class="rating-value" value="5"> </div>
+
+                        <textarea class="form-control rating-comment" rows="2" placeholder="Chất lượng sản phẩm thế nào? (Không bắt buộc)"></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    modalBody.innerHTML = html;
+
+    // Khởi tạo mặc định 5 sao (tô màu vàng)
+    document.querySelectorAll('.rating-item').forEach(item => {
+        const stars = item.querySelectorAll('.bi-star');
+        // Vì mặc định value=5 nên tô vàng hết
+        stars.forEach(s => {
+            s.classList.remove('bi-star');
+            s.classList.add('bi-star-fill');
+        });
+    });
+
+    const bootstrap = window.bootstrap;
+    const myModal = new bootstrap.Modal(document.getElementById("ratingModal"));
+    myModal.show();
+}
+
+// 2. Xử lý click chọn sao (Giữ nguyên, chỉ đảm bảo logic đúng)
+window.selectStar = (starElement, value) => {
+    const container = starElement.parentElement;
+    const stars = container.querySelectorAll('i');
+    const input = container.querySelector('.rating-value');
+
+    input.value = value;
+
+    stars.forEach((s, index) => {
+        if (index < value) {
+            s.classList.remove('bi-star');
+            s.classList.add('bi-star-fill'); // Sao đặc
+        } else {
+            s.classList.remove('bi-star-fill');
+            s.classList.add('bi-star'); // Sao rỗng
+        }
+    });
+}
+
+// 3. Gửi đánh giá lên Server
+window.submitProductReviews = async () => {
+    const userLocal = localStorage.getItem("user");
+    if (!userLocal) {
+        alert("Vui lòng đăng nhập lại.");
+        return;
+    }
+    const user = JSON.parse(userLocal);
+    const userId = user.maNguoiDung;
+
+    const ratingItems = document.querySelectorAll(".rating-item");
+    const reviews = [];
+    let hasError = false;
+
+    // Duyệt qua form để lấy dữ liệu
+    ratingItems.forEach(item => {
+        const productId = item.getAttribute("data-product-id");
+        const soSao = item.querySelector(".rating-value").value;
+        const binhLuan = item.querySelector(".rating-comment").value.trim();
+
+        // === SỬA: Kiểm tra chặt chẽ ID sản phẩm ===
+        if (!productId || productId === "undefined" || productId === "null") {
+            hasError = true;
+            return;
+        }
+
+        reviews.push({
+            maNguoiDung: parseInt(userId),
+            maSanPham: productId, 
+            soSao: parseInt(soSao),
+            binhLuan: binhLuan
+        });
+    });
+
+    if (hasError) {
+        alert("Lỗi: Không tìm thấy ID sản phẩm. Vui lòng F12 -> Console để xem chi tiết lỗi API.");
+        return;
+    }
+
+    if (reviews.length === 0) return;
+
+    if(!confirm("Gửi đánh giá cho " + reviews.length + " sản phẩm?")) return;
+
+    let successCount = 0;
+    let failMessages = [];
+
+    // Gửi từng request
+    for (const review of reviews) {
+        try {
+            const res = await fetch("http://127.0.0.1:8000/api/danh-gia/them", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(review)
+            });
+            
+            const data = await res.json();
+
+            if (res.ok && data.status === 'success') {
+                successCount++;
+            } else {
+                console.error("Lỗi server trả về:", data);
+                failMessages.push(data.message || "Lỗi không xác định");
+            }
+        } catch (err) {
+            console.error("Lỗi mạng:", err);
+            failMessages.push("Lỗi kết nối");
+        }
+    }
+
+    if (successCount > 0) {
+        alert(`Thành công! Đã gửi ${successCount} đánh giá.`);
+        const modal = window.bootstrap.Modal.getInstance(document.getElementById("ratingModal"));
+        if(modal) modal.hide();
+    } 
+    
+    if (failMessages.length > 0) {
+        alert("Có lỗi xảy ra:\n" + failMessages.join("\n"));
+    }
+}
+
+window.handleBuyAgain = async (orderId) => {
+  const userLocal = localStorage.getItem("user");
+  const token = localStorage.getItem("access_token"); // Lấy token để xác thực
+  if (!userLocal || !token) {
+      alert("Vui lòng đăng nhập lại.");
+      return;
+  }
+  
+  // 1. Lấy thông tin đơn hàng
+  const order = window.userOrders.find((o) => String(o.id) === String(orderId));
+  if (!order || !order.items || order.items.length === 0) return;
+
+  if (!confirm(`Thêm ${order.items.length} sản phẩm vào giỏ hàng?`)) return;
+
+  // 2. Chuẩn bị dữ liệu gửi đi (Format đúng theo Backend yêu cầu)
+  const itemsToSend = order.items.map(item => ({
+      maSanPham: item.maSanPham || item.product_id, // Lấy đúng ID
+      soLuong: 1 // Mặc định mua lại số lượng 1 (hoặc để item.qty nếu muốn)
+  }));
+
+  try {
+      // 3. Gọi API thêm nhiều (Chỉ 1 request duy nhất)
+      const res = await fetch("http://127.0.0.1:8000/api/gio-hang/them-nhieu", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+              "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ items: itemsToSend })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+          alert(data.message);
+          // Nếu có cảnh báo (ví dụ hết hàng) thì hiện thêm
+          if (data.warnings && data.warnings.length > 0) {
+              alert("Lưu ý:\n" + data.warnings.join("\n"));
+          }
+          //window.location.href = "cart.html"; // Chuyển trang
+      } else {
+          alert("Lỗi: " + data.message);
+      }
+  } catch (error) {
+      console.error("Lỗi mua lại:", error);
+      alert("Lỗi kết nối server.");
+  }
 }
