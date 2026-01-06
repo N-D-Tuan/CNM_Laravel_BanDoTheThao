@@ -38,9 +38,6 @@ Route::post('/san-pham/xuat-kho', [SanPhamController::class, 'xuatKho']);
 //Lấy toàn bộ đơn hàng cho admin
 Route::get('/donhang', [DonHangController::class, 'index']);
 
-//tạo đơn hàng
-Route::post('/donhang', [DonHangController::class, 'store']);
-
 //lấy đơn hàng theo user
 Route::get('/donhang/user/{id}', [DonHangController::class, 'getByUser']);
 
@@ -84,7 +81,7 @@ Route::put('/danhmucsanpham/{id}', [DanhMucSanPhamController::class, 'update']);
 Route::delete('/danhmucsanpham/{id}', [DanhMucSanPhamController::class, 'destroy']);
 Route::prefix('users')->group(function () {
     // --- NHÓM 1: CÔNG KHAI (Public Routes) ---
-    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/login', [UserController::class, 'login'])->name('login');
     Route::post('/register', [UserController::class, 'register']); 
     Route::post('/send-otp', [UserController::class, 'sendOtp']); 
     Route::post('/forgot-password', [UserController::class, 'forgotPassword']); 

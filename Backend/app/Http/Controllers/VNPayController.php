@@ -80,10 +80,10 @@ class VNPayController extends Controller
         // Kiểm tra mã phản hồi từ VNPay
         if ($request->vnp_ResponseCode == "00") {
             // Redirect về Frontend kèm tham số success để JS xử lý tiếp
-            return redirect("http://127.0.0.1:5500/index.html?payment=success&order_id=" . $request->vnp_TxnRef);
+            return redirect()->away("http://127.0.0.1:5500/index.html?payment=success");
         } else {
             // Redirect kèm tham số failed
-            return redirect("http://127.0.0.1:5500/index.html?payment=failed");
+            return redirect()->away("http://127.0.0.1:5500/index.html?payment=failed");
         }
     }
 }

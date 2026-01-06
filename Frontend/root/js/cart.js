@@ -365,12 +365,22 @@ window.checkout = async function() {
         return;
     }
 
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        showNotification('⚠️ Vui lòng đăng nhập để thanh toán!', 'warning');
-        showPage('login');
+    //Làm sạch địa chỉ và ghi chú trước khi hiển thị trang thanh toán
+    sessionStorage.removeItem('pendingAddress');
+    sessionStorage.removeItem('pendingNote'); 
+
+    const address = document.getElementById('orderAddress').value.trim();
+    const note = document.getElementById('orderNote').value.trim();
+
+    if (!address) {
+        showNotification('⚠️ Vui lòng nhập địa chỉ giao hàng!', 'warning');
         return;
     }
+
+    sessionStorage.setItem('pendingAddress', address);
+    sessionStorage.setItem('pendingNote', note);
+
+    const token = localStorage.getItem('access_token');
 
     try {
         const response = await fetch(`http://127.0.0.1:8000/api/vnpay/create`, {
@@ -378,7 +388,7 @@ window.checkout = async function() {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${token}` // THÊM DÒNG NÀY
+                'Authorization': `Bearer ${token}` 
             },
             body: JSON.stringify({
                 amount: cartData.tongTien,
@@ -402,15 +412,68 @@ window.checkout = async function() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
+window.processOrderCreation = async function () {
+    const token = localStorage.getItem('access_token');
+    const userLocal = localStorage.getItem('user');
+    const address = sessionStorage.getItem('pendingAddress');
+    const note = sessionStorage.getItem('pendingNote');
+    
+    if (!token || !userLocal || !address) {
+        console.error("Thiếu thông tin: Token, User hoặc Địa chỉ.");
+        return;
+    }
 
-    if (urlParams.get('payment') === 'success') {
-        alert("Thanh toán thành công! Đơn hàng của bạn đang được xử lý.");
+    const user = JSON.parse(userLocal);
 
-        if (typeof clearCart === 'function')
-            clearCart();
+    try {
+        const cartRes = await fetch(`http://127.0.0.1:8000/api/giohang`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
+        const cartResult = await cartRes.json();
+
+        if (!cartResult.success || !cartResult.data.items || cartResult.data.items.length === 0) {
+            console.error("Giỏ hàng rỗng hoặc không lấy được dữ liệu.");
+            return;
+        }
+
+        const orderData = {
+            maNguoiDung: user.maNguoiDung,
+            diaChi: address,
+            ghiChu: note,
+            sanPhams: cartResult.data.items.map(item => ({
+                maSanPham: item.maSanPham,
+                soLuong: item.soLuong
+            }))
+        };
+        const res = await fetch(`http://127.0.0.1:8000/api/donhang`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        const result = await res.json();
+
+        if (res.ok && result.status) {
+            await window.executeClearCart();
+
+            sessionStorage.removeItem('pendingAddress');
+            sessionStorage.removeItem('pendingNote');           
+        }else {
+            console.error("Lỗi từ Backend khi tạo đơn:", result.message);
+        }
+    } catch (error) {
+        console.error("Lỗi tạo đơn hàng sau thanh toán:", error);
+    } finally {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
-});
+}
