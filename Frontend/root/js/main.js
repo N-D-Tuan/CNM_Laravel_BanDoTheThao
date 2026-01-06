@@ -164,10 +164,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const paymentModal = new bootstrap.Modal(document.getElementById('paymentSuccessModal'));
         paymentModal.show();
 
+        if (typeof window.processOrderCreation === 'function') {
+            window.processOrderCreation();
+        }
+
         if (typeof window.executeClearCart === 'function') {
             window.executeClearCart();
         }
+    }
 
+    if (urlParams.get('payment') === 'failed') {
+        const paymentFailModal = new bootstrap.Modal(document.getElementById('paymentFailModal'));
+        paymentFailModal.show();
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 });

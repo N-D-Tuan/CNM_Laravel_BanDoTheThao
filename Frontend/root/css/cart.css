@@ -141,13 +141,17 @@ body {
     padding-left: 15px; 
 }
 
-.cart-summary {
-    border: 1px solid var(--border-color);
-    /* Giúp phần tóm tắt dài ra bằng cách chiếm hết chiều rộng cột */
-    width: 100%; 
-    min-width: 320px;
-    /* Tạo khoảng cách an toàn phía trên */
-    margin-top: 20px; 
+/* Xóa bỏ khoảng cách bên trái cố định để tạo margin tự do */
+.cart-summary-container {
+    padding-left: 0 !important; 
+}
+
+/* Tăng khoảng cách hiển thị cho nhãn nhỏ */
+.extra-small {
+    font-size: 0.75rem;
+    display: inline-block;
+    margin-bottom: 5px;
+    color: #495057;
 }
 
 /* Tùy chỉnh đường kẻ ngăn cách */
@@ -177,4 +181,86 @@ hr {
 #checkoutBtn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3) !important;
+}
+
+/* Đảm bảo khung tóm tắt luôn đi theo khi cuộn trang (Sticky) */
+.cart-summary {
+    min-height: 450px; /* Chiều cao tối thiểu để nhìn đầy đặn */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Kiểu dáng cho thẻ tóm tắt tổng quát */
+.summary-total {
+    border: 1px dashed #dee2e6;
+}
+
+/* Đảm bảo khung nhận hàng kéo dài đồng nhất */
+#orderAddress, #orderNote {
+    resize: none;
+    border: 1px solid #e0e0e0;
+}
+
+#orderAddress:focus, #orderNote:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+}
+
+/* Khoảng cách cho mobile */
+@media (max-width: 991.98px) {
+    .col-lg-4 {
+        margin-top: 2rem;
+    }
+    .cart-summary {
+        min-height: auto;
+    }
+}
+
+/* Tạo hiệu ứng khung tóm tắt bám dính khi cuộn */
+.sticky-top {
+    z-index: 10;
+}
+
+/* Kẻ nét đứt cho ô Tổng thanh toán */
+.border-dashed {
+    border: 1px dashed #dee2e6 !important;
+}
+
+/* Đảm bảo TextArea không bị người dùng kéo làm vỡ giao diện */
+#orderAddress, #orderNote {
+    resize: none;
+}
+
+/* Điều chỉnh lại độ cao của khung tóm tắt để bao phủ tốt hơn */
+.cart-summary {
+    min-height: 480px; 
+}
+
+/* Đảm bảo hàng (row) luôn dùng Flexbox chuẩn */
+#cartContent {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: flex-start; /* Giúp cột phải không bị kéo dài vô lý */
+}
+
+/* Ép cột phải luôn nằm đúng vị trí trên màn hình lớn */
+@media (min-width: 992px) {
+    .col-lg-4 {
+        position: sticky;
+        top: 20px;
+    }
+    
+    .cart-summary {
+        min-height: 500px; /* Tạo độ dài cho khung tóm tắt */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+}
+
+/* Fix lỗi textarea có thể bị kéo làm vỡ khung */
+#orderAddress, #orderNote {
+    resize: none;
+    border-radius: 8px;
 }

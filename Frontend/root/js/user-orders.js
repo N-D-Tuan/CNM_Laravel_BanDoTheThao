@@ -130,7 +130,11 @@ window.filterByStatus = (status, element) => {
 
 window.filterUserOrders = () => {
   const term = document.getElementById("user-order-search").value.toLowerCase()
-  const filtered = window.userOrders.filter((o) => o.id.toLowerCase().includes(term))
+  
+  const filtered = window.userOrders.filter((o) => 
+    String(o.id).toLowerCase().includes(term)
+  );
+
   const listContainer = document.getElementById("user-order-list")
   if (listContainer) {
     listContainer.innerHTML =

@@ -47,6 +47,8 @@ class DonHangController extends Controller
 
     public function store(Request $request)
     {
+        \Log::info('Dữ liệu tạo đơn hàng:', $request->all());
+
         DB::beginTransaction();
         try {
             //tạo đơn hàng
@@ -55,7 +57,8 @@ class DonHangController extends Controller
                 'trangThai' => 'Chờ duyệt',
                 'diaChi' => $request->diaChi,
                 'ghiChu' => $request->ghiChu ?? null,
-                'tongTien' => 0
+                'tongTien' => 0,
+                'ngayDat' => now()
             ]);
 
             $tongTien = 0;
