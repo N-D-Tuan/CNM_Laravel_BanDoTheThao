@@ -58,7 +58,7 @@ class SanPhamController extends Controller
         }
 
         return response()->json(
-            $query->with('danhmucsanpham')->paginate(5)
+            $query->with('danhmucsanpham')->paginate(9)
         );
     }
 
