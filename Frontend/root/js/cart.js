@@ -89,6 +89,14 @@ async function loadCart() {
 /* ================== RENDER CART ================== */
 function renderCart() {
     const container = document.getElementById('cartItems');
+
+    if (!container) return;
+
+    if (!cartData.items || cartData.items.length === 0) {
+        showEmptyCart();
+        return;
+    }
+
     container.innerHTML = '';
 
     cartData.items.forEach(item => {
@@ -181,9 +189,21 @@ function renderCart() {
 
 /* ================== EMPTY CART ================== */
 function showEmptyCart() {
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('cartContent').style.display = 'none';
-    document.getElementById('emptyCart').style.display = 'block';
+    cartData = { items: [], tongTien: 0, soLuongSanPham: 0 };
+    
+    updateSummary();
+
+    const loadingEl = document.getElementById('loadingState');
+    const contentEl = document.getElementById('cartContent');
+    const emptyEl = document.getElementById('emptyCart');
+    const itemsContainer = document.getElementById('cartItems');
+
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (contentEl) contentEl.style.display = 'none'; // Ẩn toàn bộ khối sản phẩm & tóm tắt
+    if (emptyEl) emptyEl.style.display = 'block';    // Hiện thông báo trống
+    
+    // QUAN TRỌNG: Xóa sạch nội dung sản phẩm cũ để không bị "bóng ma" giao diện
+    if (itemsContainer) itemsContainer.innerHTML = '';
 }
 
 /* ================== UPDATE QUANTITY ================== */
@@ -236,7 +256,9 @@ async function removeFromCart(id) {
 
         if (res.ok && result.success) {
             showNotification('✓ Đã xóa sản phẩm!', 'success');
-            loadCart();
+            await loadCart(); 
+            
+            if (typeof updateCartCount === 'function') updateCartCount();
         } else {
             showNotification(result.message || 'Lỗi xóa!', 'error');
         }
@@ -267,13 +289,16 @@ window.executeClearCart = async function() {
             cartData = { items: [], tongTien: 0, soLuongSanPham: 0 };
             const emptyEl = document.getElementById('emptyCart');
             const contentEl = document.getElementById('cartContent');
-            
+            updateSummary();
+
             if (emptyEl && contentEl) {
                 contentEl.style.display = 'none';
                 emptyEl.style.display = 'block';
             }
             
             if (typeof updateCartCount === 'function') updateCartCount();
+
+            showEmptyCart();
         }
     } catch (error) {
         console.error('Lỗi tự động xóa giỏ hàng:', error);
@@ -315,9 +340,13 @@ function setupEventListeners() {
 
 /* ================== SUMMARY ================== */
 function updateSummary() {
-    document.getElementById('totalItems').textContent = cartData.soLuongSanPham;
-    document.getElementById('subtotal').textContent = formatPrice(cartData.tongTien) + ' VNĐ';
-    document.getElementById('totalPrice').textContent = formatPrice(cartData.tongTien) + ' VNĐ';
+    const totalItemsEl = document.getElementById('totalItems');
+    const subtotalEl = document.getElementById('subtotal');
+    const totalPriceEl = document.getElementById('totalPrice');
+
+    if (totalItemsEl) totalItemsEl.innerText = cartData.soLuongSanPham || 0;
+    if (subtotalEl) subtotalEl.innerText = (cartData.tongTien || 0).toLocaleString('vi-VN') + ' VNĐ';
+    if (totalPriceEl) totalPriceEl.innerText = (cartData.tongTien || 0).toLocaleString('vi-VN') + ' VNĐ';
 }
 
 function formatPrice(n) {

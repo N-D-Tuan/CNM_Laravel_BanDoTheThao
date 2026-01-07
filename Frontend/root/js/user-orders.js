@@ -496,7 +496,7 @@ window.handleBuyAgain = async (orderId) => {
           if (data.warnings && data.warnings.length > 0) {
               alert("Lưu ý:\n" + data.warnings.join("\n"));
           }
-          window.location.href = "order-user.html"; // Chuyển trang
+          showPage('gio-hang');
       } else {
           alert("Lỗi: " + data.message);
       }
