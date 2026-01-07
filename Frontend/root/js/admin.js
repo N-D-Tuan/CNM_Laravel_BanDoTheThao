@@ -280,14 +280,14 @@ window.promptEditCategory = async function(id, oldName) {
 //===========================================================
 // san pham
 
-window.fetchProducts = async function() {
+window.fetchProducts = async function(page = 1) {
     const token = localStorage.getItem('access_token');
     
     const keyword = document.getElementById('search-keyword')?.value || '';
     const cateId = document.getElementById('filter-category')?.value || '';
 
     try {
-        let url = `${API_URL}/san-pham/filter?page=1`; 
+        let url = `${API_URL}/san-pham/filter?page=${page}`; 
         
         if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
         if (cateId) url += `&categoryId=${cateId}`;
@@ -298,15 +298,45 @@ window.fetchProducts = async function() {
         
         const result = await response.json();
 
-        const products = result.data ? result.data : result;
+        const products = result.data ? result.data : [];
 
         renderProductTable(products);
+
+        if (result.last_page > 1) {
+            renderPagination(result);
+        } else {
+            document.getElementById('pagination-controls').innerHTML = ''; 
+        }
 
     } catch (e) {
         console.error("Lỗi nạp sản phẩm:", e);
         document.getElementById('product-table-body').innerHTML = `<tr><td colspan="7" class="text-center text-danger">Lỗi kết nối server</td></tr>`;
     }
-}
+};
+
+window.renderPagination = function(meta) {
+    const paginationContainer = document.getElementById('pagination-controls');
+    let html = '';
+
+    // Nút Previous
+    html += `<li class="page-item ${meta.current_page === 1 ? 'disabled' : ''}">
+                <button class="page-link" onclick="fetchProducts(${meta.current_page - 1})">Trước</button>
+             </li>`;
+
+    // Các nút số trang (Vẽ đơn giản: hiện tất cả các trang)
+    for (let i = 1; i <= meta.last_page; i++) {
+        html += `<li class="page-item ${meta.current_page === i ? 'active' : ''}">
+                    <button class="page-link" onclick="fetchProducts(${i})">${i}</button>
+                 </li>`;
+    }
+
+    // Nút Next
+    html += `<li class="page-item ${meta.current_page === meta.last_page ? 'disabled' : ''}">
+                <button class="page-link" onclick="fetchProducts(${meta.current_page + 1})">Sau</button>
+             </li>`;
+
+    paginationContainer.innerHTML = html;
+};
 
 function renderProductTable(products) {
     const tbody = document.getElementById('product-table-body');
@@ -316,7 +346,9 @@ function renderProductTable(products) {
     }
 
     tbody.innerHTML = products.map(sp => {
-        const imageUrl = sp.hinhAnh ? `http://127.0.0.1:8000/storage/${sp.hinhAnh}` : 'https://via.placeholder.com/50';
+        const imageUrl = sp.hinhAnh && sp.hinhAnh.startsWith('http') 
+            ? sp.hinhAnh 
+            : (sp.hinhAnh ? `http://127.0.0.1:8000/storage/${sp.hinhAnh}` : 'https://via.placeholder.com/50');
         const price = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(sp.giaBan);
         const categoryName = sp.danhmucsanpham ? sp.danhmucsanpham.tenDanhMuc : 'Chưa phân loại';
         
@@ -675,7 +707,7 @@ window.deleteFeature = async function(featureId) {
                         </table>
                     </div>
                 </div>`;
-            fetchCategories(); // Gọi hàm load danh mục
+            fetchCategories(); 
             break;
 
         case 'products':
@@ -690,15 +722,15 @@ window.deleteFeature = async function(featureId) {
 
                     <div class="row g-2 mb-3">
                         <div class="col-md-5">
-                            <input type="text" id="search-keyword" class="form-control" placeholder="Nhập tên sản phẩm..." onkeypress="if(event.key==='Enter') fetchProducts()">
+                            <input type="text" id="search-keyword" class="form-control" placeholder="Nhập tên sản phẩm..." onkeypress="if(event.key==='Enter') fetchProducts(1)">
                         </div>
                         <div class="col-md-4">
-                            <select id="filter-category" class="form-select" onchange="fetchProducts()">
+                            <select id="filter-category" class="form-select" onchange="fetchProducts(1)">
                                 <option value="">-- Tất cả danh mục --</option>
-                                </select>
+                            </select>
                         </div>
                         <div class="col-md-3">
-                            <button class="btn btn-primary w-100" onclick="fetchProducts()">
+                            <button class="btn btn-primary w-100" onclick="fetchProducts(1)">
                                 <i class="bi bi-search"></i> Tìm kiếm
                             </button>
                         </div>
@@ -722,10 +754,14 @@ window.deleteFeature = async function(featureId) {
                             </tbody>
                         </table>
                     </div>
+
+                    <nav class="d-flex justify-content-center mt-3">
+                        <ul class="pagination" id="pagination-controls"></ul>
+                    </nav>
                 </div>`;
             
             loadCategoriesForFilter();
-            fetchProducts(); 
+            fetchProducts(1); 
             break;
 
         case 'orders':
