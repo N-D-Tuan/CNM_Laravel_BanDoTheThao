@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class SanPhamController extends Controller
 {
-    // Danh sách sản phẩm
     public function index()
     {
         return response()->json(
@@ -17,7 +16,6 @@ class SanPhamController extends Controller
         );
     }
 
-    // Chi tiết 1 sản phẩm
     public function show($id)
     {
         return response()->json(
@@ -25,7 +23,6 @@ class SanPhamController extends Controller
         );
     }
 
-    // Lấy sản phẩm theo danh mục
     public function getByDanhMuc($id)
     {
         return response()->json(
@@ -33,52 +30,38 @@ class SanPhamController extends Controller
         );
     }
 
-    // Lọc + tìm kiếm sản phẩm
     public function filter(Request $request)
     {
         $query = Sanpham::query();
 
-        /* ===== SEARCH ===== */
         if ($request->filled('keyword')) {
             $keyword = $this->removeVietnameseAccents($request->keyword);
-
-            $query->whereRaw(
-                "LOWER(tenSanPham) LIKE ?",
-                ['%' . $keyword . '%']
-            );
+            $query->whereRaw("LOWER(tenSanPham) LIKE ?", ['%' . $keyword . '%']);
         }
 
-        /* ===== LỌC DANH MỤC ===== */
         if ($request->filled('categoryId') && $request->categoryId != 0) {
             $query->where('maDanhMuc', $request->categoryId);
         }
 
-        /* ===== LỌC GIÁ ===== */
         if ($request->filled('minPrice') && $request->filled('maxPrice')) {
-            $query->whereBetween('giaBan', [
-                $request->minPrice,
-                $request->maxPrice
-            ]);
+            $query->whereBetween('giaBan', [$request->minPrice, $request->maxPrice]);
         }
 
-        /* ===== SORT ===== */
         if ($request->filled('sort')) {
             match ($request->sort) {
-                'newest'       => $query->orderByDesc('created_at'),
-                'best-seller' => $query
-                    ->withSum('chitietdonhangs as soLuongBan', 'soLuong')
-                    ->orderByDesc('soLuongBan'),
-                'price-asc'    => $query->orderBy('giaBan'),
-                'price-desc'   => $query->orderByDesc('giaBan'),
-                default        => $query
+                'newest'      => $query->orderByDesc('created_at'),
+                'best-seller' => $query->withSum('chitietdonhangs as soLuongBan', 'soLuong')->orderByDesc('soLuongBan'),
+                'price-asc'   => $query->orderBy('giaBan'),
+                'price-desc'  => $query->orderByDesc('giaBan'),
+                default       => $query
             };
         }
 
-        //  PHÂN TRANG
         return response()->json(
-            $query->paginate(9)
+            $query->with('danhmucsanpham')->paginate(5)
         );
     }
+
     private function removeVietnameseAccents($str)
     {
         $accents = [
@@ -90,15 +73,12 @@ class SanPhamController extends Controller
             'u' => 'ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự',
             'y' => 'ý|ỳ|ỷ|ỹ|ỵ',
         ];
-
         foreach ($accents as $nonAccent => $accent) {
             $str = preg_replace("/($accent)/i", $nonAccent, $str);
         }
-
         return strtolower($str);
     }
 
-    // Thêm sản phẩm
     public function store(Request $request)
     {
         $request->validate([
@@ -111,29 +91,11 @@ class SanPhamController extends Controller
             'maDanhMuc'  => 'required|exists:danhmucsanpham,maDanhMuc',
         ]);
 
-        $sp = Sanpham::create($request->only([
-            'tenSanPham',
-            'giaNhap',
-            'giaBan',
-            'soLuongTon',
-            'maDanhMuc',
-            'hinhAnh',
-            'moTa'
-        ]));
-
-         $data = $request->only([
-             'tenSanPham',
-             'giaNhap',
-             'giaBan',
-             'soLuongTon',
-             'maDanhMuc',
-             'moTa'
-        ]);
-
+        $data = $request->except('hinhAnh');
 
         if ($request->hasFile('hinhAnh')) {
             $path = $request->file('hinhAnh')->store('sanpham', 'public');
-            $data['hinhAnh'] = $path;
+            $data['hinhAnh'] = $path; 
         }
 
         $sp = Sanpham::create($data);
@@ -141,7 +103,6 @@ class SanPhamController extends Controller
         return response()->json($sp, 201);
     }
 
-    // Cập nhật sản phẩm
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -156,24 +117,7 @@ class SanPhamController extends Controller
 
         $sp = Sanpham::findOrFail($id);
 
-        $sp->update($request->only([
-            'tenSanPham',
-            'giaNhap',
-            'giaBan',
-            'soLuongTon',
-            'maDanhMuc',
-            'hinhAnh',
-            'moTa'
-        ]));
-
-         $data = $request->only([
-            'tenSanPham',
-            'giaNhap',
-            'giaBan',
-            'soLuongTon',
-            'maDanhMuc',
-           'moTa'
-        ]);
+        $data = $request->except('hinhAnh');
 
         if ($request->hasFile('hinhAnh')) {
             $path = $request->file('hinhAnh')->store('sanpham', 'public');
@@ -181,16 +125,16 @@ class SanPhamController extends Controller
         }
 
         $sp->update($data);
+
         return response()->json($sp);
     }
 
-    // Xóa sản phẩm
     public function destroy($id)
     {
         Sanpham::destroy($id);
         return response()->json(['message' => 'Xóa sản phẩm thành công']);
     }
-    // Nhập kho
+
     public function nhapKho(Request $request)
     {
         $request->validate([
@@ -206,12 +150,9 @@ class SanPhamController extends Controller
             }
         });
 
-        return response()->json([
-            'message' => 'Nhập kho thành công'
-        ]);
+        return response()->json(['message' => 'Nhập kho thành công']);
     }
 
-    // Xuất kho
     public function xuatKho(Request $request)
     {
         $request->validate([
@@ -222,32 +163,21 @@ class SanPhamController extends Controller
 
         try {
             DB::transaction(function () use ($request) {
-
-                // Check tồn kho
                 foreach ($request->items as $item) {
                     $sp = Sanpham::findOrFail($item['maSanPham']);
-
                     if ($sp->soLuongTon < $item['soLuong']) {
-                        throw new Exception(
-                            "Sản phẩm {$sp->tenSanPham} không đủ tồn kho"
-                        );
+                        throw new Exception("Sản phẩm {$sp->tenSanPham} không đủ tồn kho");
                     }
                 }
-
-                // Trừ kho
                 foreach ($request->items as $item) {
                     $sp = Sanpham::findOrFail($item['maSanPham']);
                     $sp->decrement('soLuongTon', $item['soLuong']);
                 }
             });
 
-            return response()->json([
-                'message' => 'Xuất kho thành công'
-            ]);
+            return response()->json(['message' => 'Xuất kho thành công']);
         } catch (Exception $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 }
