@@ -53,7 +53,8 @@ class User extends Authenticatable
 		'role',
 		'resetOtp',
 		'resetOtpExpiry',
-        'remember_token'
+        'remember_token',
+		'google_id'
 	];
 
 	protected $hidden = [

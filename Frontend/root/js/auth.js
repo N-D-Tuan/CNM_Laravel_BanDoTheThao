@@ -45,14 +45,45 @@ async function handleLogin() {
     }
 }
 
+// async function handleLogout() {
+//     const token = localStorage.getItem('access_token');
+//     await fetch(`${API_URL}/users/logout`, {
+//         method: 'POST',
+//         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+//     });
+//     localStorage.clear();
+//     location.reload();
+// }
+
 async function handleLogout() {
     const token = localStorage.getItem('access_token');
-    await fetch(`${API_URL}/users/logout`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
-    });
-    localStorage.clear();
-    location.reload();
+
+    try {
+        if (token) {
+            await fetch(`${API_URL}/users/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+        }
+    } catch (e) {
+        console.warn('Logout API fail, vẫn xoá local', e);
+    }
+
+    // Xoá state FE
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+
+    // Render lại header
+    renderHeader();
+
+    // Quay về trang chủ
+    showPage('trang-chu');
+
+    // Xoá query nếu có
+    window.history.replaceState({}, document.title, "index.html");
 }
 
 
@@ -320,3 +351,14 @@ window.finalizeChangePassword = async function() {
         console.error(e);
     }
 };
+
+//Đăng nhập social
+function handleFacebookLogin() {
+    console.log('Đăng nhập Facebook');
+    // Thêm logic đăng nhập Facebook ở đây
+}
+
+function handleGoogleLogin() {
+    console.log('Đăng nhập Google');
+    // Thêm logic đăng nhập Google ở đây
+}

@@ -180,4 +180,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const loginStatus = params.get('login');
+
+    // Login bằng Google redirect về
+    if (loginStatus === 'success') {
+        const token = params.get('token');
+        const user = JSON.parse(params.get('user'));
+
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        renderHeader();
+        showPage('trang-chu');
+
+        // xoá query
+        window.history.replaceState({}, document.title, "index.html");
+        return;
+    }
+
+    // Đã login trước đó (F5 / reload)
+    if (localStorage.getItem('access_token')) {
+        renderHeader();
+        showPage('trang-chu');
+        return;
+    }
+
+    // Login thất bại
+    if (loginStatus === 'fail') {
+        alert('Đăng nhập Google thất bại');
+        showPage('login');
+    }
+});
+
+
 window.onload = init;
+

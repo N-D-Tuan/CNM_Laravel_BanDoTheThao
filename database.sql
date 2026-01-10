@@ -112,6 +112,11 @@ ALTER TABLE sanpham ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP;
 -- 8. Bổ sung cột cho Giỏ hàng
 ALTER TABLE GioHang ADD COLUMN soLuong INT DEFAULT 1;
 
+-- 9. Bổ sung cột cho User
+ALTER TABLE User ADD google_id VARCHAR(50) NULL;
+
+ALTER TABLE User MODIFY soDienThoai VARCHAR(20) NULL;
+
 -- 3. Chèn dữ liệu Danh mục
 INSERT INTO DanhMucSanPham (tenDanhMuc) VALUES 
 ('Giày Bóng Đá'),
