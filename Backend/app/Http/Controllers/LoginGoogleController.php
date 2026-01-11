@@ -99,7 +99,7 @@ class LoginGoogleController extends Controller
             $token = $user->createToken('google-login')->plainTextToken;
 
             return redirect(
-                'http://127.0.0.1:5500/Frontend/index.html?' .
+                'http://127.0.0.1:5500/index.html?' .
                 http_build_query([
                     'login' => 'success',
                     'token' => $token,
