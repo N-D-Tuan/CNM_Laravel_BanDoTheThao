@@ -214,6 +214,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+window.setActiveMain = (element) => {
+    // 1. Tìm tất cả các link trong main navbar
+    const navLinks = document.querySelectorAll('#main-navbar-nav .nav-link');
+    
+    // 2. Xóa class active khỏi tất cả các link
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // 3. Thêm class active vào link vừa click
+    element.classList.add('active');
+};
 
 window.onload = init;
 

@@ -309,10 +309,14 @@ window.showEvaluationModal = (orderId) => {
             console.warn("Vui lòng kiểm tra API DonHangController xem đã select cột 'maSanPham' chưa.");
         }
 
+        const imgSrc = item.img 
+            ? (item.img.startsWith('http') ? item.img : `http://127.0.0.1:8000/storage/${item.img}`) 
+            : 'https://via.placeholder.com/300';
+
         return `
             <div class="card mb-3 border-0 shadow-sm rating-item" data-product-id="${productId}">
                 <div class="card-body d-flex gap-3">
-                    <img src="${item.img}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                    <img src="${imgSrc}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
                     <div class="flex-grow-1">
                         <h6 class="fw-bold mb-1">${item.name}</h6>
                         

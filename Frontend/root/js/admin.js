@@ -15,6 +15,19 @@ window.loadAdminStats = async function() {
     } catch (e) { console.error("Lỗi nạp thống kê:", e); }
 };
 
+window.setActive = (element) => {
+    // 1. Tìm tất cả các link có class 'nav-link' trong sidebar
+    const sidebarLinks = document.querySelectorAll('#admin-sidebar-nav .nav-link');
+    
+    // 2. Duyệt qua từng link và xóa class 'active'
+    sidebarLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // 3. Thêm class 'active' duy nhất cho mục vừa được click
+    element.classList.add('active');
+};
+
 // --- LẤY DANH SÁCH NGƯỜI DÙNG ĐANG HOẠT ĐỘNG ---
 window.fetchUserList = async function() {
     const token = localStorage.getItem('access_token');

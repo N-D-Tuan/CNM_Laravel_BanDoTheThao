@@ -3,20 +3,20 @@
         <div class="sidebar-header">
             <h4 class="fw-bold mb-0 text-primary">LPT <span class="text-white">ADMIN</span></h4>
         </div>
-        <div class="nav flex-column mt-3">
-            <a href="#" class="nav-link active" onclick="event.preventDefault(); showAdminContent('default')">
+        <div class="nav flex-column mt-3" id="admin-sidebar-nav">
+            <a href="#" class="nav-link active" onclick="event.preventDefault(); setActive(this); showAdminContent('default')">
                 <i class="bi bi-speedometer2"></i> Thống kê
             </a>
-            <a href="#" class="nav-link" onclick="event.preventDefault(); showAdminContent('users')">
+            <a href="#" class="nav-link" onclick="event.preventDefault(); setActive(this); showAdminContent('users')">
                 <i class="bi bi-people"></i> Người dùng
             </a>
-            <a href="#" class="nav-link" onclick="event.preventDefault(); showAdminContent('categories')">
+            <a href="#" class="nav-link" onclick="event.preventDefault(); setActive(this); showAdminContent('categories')">
                 <i class="bi bi-grid"></i> Danh mục
             </a>
-            <a href="#" class="nav-link" onclick="event.preventDefault(); showAdminContent('products')">
+            <a href="#" class="nav-link" onclick="event.preventDefault(); setActive(this); showAdminContent('products')">
                 <i class="bi bi-box-seam"></i> Sản phẩm
             </a>
-            <a href="#" class="nav-link" onclick="event.preventDefault(); renderOrderManagement()">
+            <a href="#" class="nav-link" onclick="event.preventDefault(); setActive(this); renderOrderManagement()">
                 <i class="bi bi-cart-check"></i> Đơn hàng
             </a>
             <hr class="mx-3 text-secondary">
